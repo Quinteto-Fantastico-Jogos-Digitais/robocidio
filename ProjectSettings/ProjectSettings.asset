@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 28
-  productGUID: 9f8c9f3f365cb184a9c6817ac38d0435
+  productGUID: 361a029cd516a754188f114558d571ce
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: robocidio
+  productName: "Prot\xF3tipo Roboc\xEDdio 1"
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -842,14 +842,14 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: robocidio
+  metroPackageName: "Prot\xF3tipo Roboc\xEDdio 1"
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: robocidio
+  metroApplicationDescription: "Prot\xF3tipo Roboc\xEDdio 1"
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -918,13 +918,13 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 1
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: c86634b0-c641-4e11-93bc-020f29e12af9
+  cloudProjectId: 87cf5aaf-a3e1-4e67-8fa5-c7d30b0c0f9f
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: robocidio
-  organizationId: diegocc9
+  projectName: "Prot\xF3tipo Roboc\xEDdio 1"
+  organizationId: procymosvences
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
