@@ -127,6 +127,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1673678042}
     m_Modifications:
+    - target: {fileID: 734518435132487139, guid: dd1cb1b9734a53a44b27c497f7c4048c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: e0bf997a61a1f3a44a3fae76a4a5486f, type: 3}
+    - target: {fileID: 3379631691851926689, guid: dd1cb1b9734a53a44b27c497f7c4048c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: e0bf997a61a1f3a44a3fae76a4a5486f, type: 3}
     - target: {fileID: 8313257782544269108, guid: dd1cb1b9734a53a44b27c497f7c4048c, type: 3}
       propertyPath: m_Name
       value: Paredes (1)
