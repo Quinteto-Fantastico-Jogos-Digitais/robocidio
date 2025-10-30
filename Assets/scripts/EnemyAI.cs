@@ -6,7 +6,8 @@ public class EnemyAI : MonoBehaviour
     private NavMeshAgent agent;
     [SerializeField] private Transform currentTarget;
     private EngagementTracker targetEngagement;
-
+    private EngagementTracker myEngagementTracker;
+    
     [Header("Detecção e Alvos")]
     public float detectionRadius = 15f;
     public LayerMask targetLayerMask;
@@ -19,8 +20,18 @@ public class EnemyAI : MonoBehaviour
     {
         if (!TryGetComponent(out agent))
         {
-            Debug.LogError("EnemyAI requer um NavMeshAgent! Adicione o componente.");
+            Debug.LogError("EnemyAI requer um NavMeshAgent! Adicione o componente ao GameObject: " + gameObject.name);
+            enabled = false;
+            return;
         }
+        
+        if (!TryGetComponent(out myEngagementTracker))
+        {
+            Debug.LogError("EnemyAI requer o EngagementTracker para funcionar.");
+            enabled = false;
+            return;
+        }
+
         agent.stoppingDistance = attackRange;
     }
 
@@ -28,16 +39,12 @@ public class EnemyAI : MonoBehaviour
     {
         FindNewTarget();
 
-        // ------------------
-        // Lógica de Movimento e Engajamento
-        // ------------------
         if (currentTarget != null)
         {
             agent.SetDestination(currentTarget.position);
             
             float distanceToTarget = Vector3.Distance(transform.position, currentTarget.position);
             
-            // Logica de Ataque
             if (distanceToTarget <= attackRange + 0.1f)
             {
                 AttackTarget(); 
@@ -45,39 +52,80 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            // Se não há alvo, garante que estamos parados.
             if (agent.hasPath)
             {
                  agent.ResetPath();
             }
-            // Não precisamos de StopTracking aqui, pois o FindNewTarget já lida com o desengajamento
         }
     }
 
     void FindNewTarget()
     {
-        Collider[] targets = Physics.OverlapSphere(transform.position, detectionRadius, targetLayerMask);
+        // 1. REGRA DE RETALIAÇÃO (PRIORIDADE MÁXIMA)
+        if (myEngagementTracker.IsTargeted && myEngagementTracker.CurrentTracker != null)
+        {
+            Transform retaliator = myEngagementTracker.CurrentTracker;
+            EngagementTracker retaliatorStatus = retaliator.GetComponent<EngagementTracker>();
+            
+            // CRUCIAL: Trava o rastreador atual
+            myEngagementTracker.StartTracking(retaliator);
+            
+            if (currentTarget != retaliator)
+            {
+                // Libera o alvo anterior (se eu estava perseguindo outro alguém antes de ser atacado)
+                if (currentTarget != null && targetEngagement != null)
+                {
+                    targetEngagement.StopTracking(this.transform);
+                }
+
+                // Configura a retaliação
+                currentTarget = retaliator;
+                targetEngagement = retaliatorStatus;
+            }
+            // O retorno garante que o cubo NUNCA mude de alvo enquanto estiver sendo atacado
+            return; 
+        }
         
+        // 2. BUSCA NORMAL (Se não está em retaliação)
+        Collider[] targets = Physics.OverlapSphere(transform.position, detectionRadius, targetLayerMask);
         float closestDistance = Mathf.Infinity;
         Transform bestTarget = null;
         EngagementTracker bestTargetStatus = null;
         
-        // --- 1. Determinação do melhor alvo ---
+        // A. Manter o Alvo Atual (Sticky Target)
+        if (currentTarget != null)
+        {
+            if (!IsTargetInSphere(currentTarget, targets))
+            {
+                if (targetEngagement != null)
+                {
+                    targetEngagement.StopTracking(this.transform);
+                }
+                currentTarget = null;
+                targetEngagement = null;
+            }
+            else
+            {
+                bestTarget = currentTarget;
+                bestTargetStatus = targetEngagement;
+                closestDistance = Vector3.Distance(transform.position, currentTarget.position); 
+            }
+        }
         
+        // B. Procurar Novos Alvos (ou um alvo mais próximo)
         foreach (Collider target in targets)
         {
-            if (target.transform == transform) 
+            if (target.transform == transform || target.transform == currentTarget) 
                 continue; 
 
             EngagementTracker targetStatus = target.GetComponent<EngagementTracker>();
             if (targetStatus == null)
                 continue;
 
-            // REGRA CRÍTICA: FILTRO DE ENGAJAMENTO (Targeted)
-            // Se o alvo já está ALVEJADO E não está sendo perseguido por mim, IGNORE.
-            if (targetStatus.IsTargeted && targetStatus.CurrentTracker != this.transform)
+            // REGRA DE EXCLUSÃO
+            if (targetStatus.IsTargeted)
             {
-                continue; // Pula para o próximo alvo na lista.
+                continue; 
             }
             
             float distance = Vector3.Distance(transform.position, target.transform.position);
@@ -90,27 +138,35 @@ public class EnemyAI : MonoBehaviour
             }
         }
         
-        // --- 2. Gerenciamento do Estado (Tracking) ---
-        
-        // Se o alvo mudou (incluindo se bestTarget se tornou null)
+        // 3. ATUALIZAÇÃO E MARCAÇÃO DE ESTADO (Com Correção de Roubo)
         if (currentTarget != bestTarget)
         {
-            // Se tínhamos um alvo, desengajamos (liberamos o alvo anterior)
-            if (currentTarget != null && targetEngagement != null)
+            // Libera o alvo anterior SOMENTE se EU sou o rastreador.
+            if (currentTarget != null && targetEngagement != null && targetEngagement.CurrentTracker == this.transform)
             {
                 targetEngagement.StopTracking(this.transform);
             }
             
-            // Atualiza o alvo atual
             currentTarget = bestTarget;
             targetEngagement = bestTargetStatus;
 
-            // Se o novo alvo não é nulo, começamos a rastreá-lo (marcamos o novo alvo)
             if (currentTarget != null && targetEngagement != null)
             {
                 targetEngagement.StartTracking(this.transform);
             }
         }
+    }
+    
+    private bool IsTargetInSphere(Transform targetTransform, Collider[] targets)
+    {
+        foreach (Collider collider in targets)
+        {
+            if (collider.transform == targetTransform)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     
     void AttackTarget()
@@ -120,8 +176,6 @@ public class EnemyAI : MonoBehaviour
         Vector3 lookAtPos = currentTarget.position;
         lookAtPos.y = transform.position.y;
         transform.LookAt(lookAtPos);
-        
-        // ** Aqui entra a lógica de dano/animação **
     }
     
     private void OnDrawGizmosSelected()
