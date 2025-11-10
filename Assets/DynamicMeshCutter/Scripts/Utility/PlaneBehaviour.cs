@@ -61,7 +61,7 @@ namespace DynamicMeshCutter
                 }
                 
                 UnityEngine.Debug.Log(target.name);
-                //DetachLimbs(target.gameObject);
+                DetachLimbs(target.gameObject);
                 Cut(target, transform.position, transform.forward, null, OnCreated);
                 
             }
