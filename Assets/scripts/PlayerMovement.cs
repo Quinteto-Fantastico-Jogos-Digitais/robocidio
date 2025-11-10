@@ -57,15 +57,10 @@ public class PlayerMovement : MonoBehaviour
     {
         joycons = (JoyconManager.Instance != null) ? JoyconManager.Instance.j : new List<Joycon>();
 
-        if (cameraTransform == null && Camera.main != null)
-            cameraTransform = Camera.main.transform;
-
-        if (cameraTransform != null)
-        {
-            // inicializa pitch com rotação local atual da câmera (normalizada)
-            pitch = NormalizeAngle(cameraTransform.localEulerAngles.x);
-            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-        }
+        // inicializa pitch com rotação local atual da câmera (normalizada)
+        pitch = NormalizeAngle(cameraTransform.localEulerAngles.x);
+        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        
     }
 
     void Update()

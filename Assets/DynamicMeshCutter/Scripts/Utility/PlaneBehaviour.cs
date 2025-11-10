@@ -1,5 +1,6 @@
 
 using System.Diagnostics;
+using Mono.Cecil;
 using UnityEngine;
 
 namespace DynamicMeshCutter
@@ -59,12 +60,51 @@ namespace DynamicMeshCutter
                     UnityEngine.Debug.Log($"No MeshTarget found for collider {h.name}");
                     continue;
                 }
-                
+
                 UnityEngine.Debug.Log(target.name);
                 DetachLimbs(target.gameObject);
                 Cut(target, transform.position, transform.forward, null, OnCreated);
-                
             }
+        }
+        
+        public void Cut(Collision col)
+        {
+
+            DebugDrawBox(transform.position, transform.lossyScale, transform.rotation, Color.green);
+
+            var h = col.gameObject;
+            //var target = h.GetComponentInParent<MeshTarget>();
+            //var target = h.GetComponentInChildren<MeshTarget>();
+
+            UnityEngine.Debug.Log($"Hit collider: {h.name} (root: {h.transform.root.name})");
+
+            // 1) Tenta o método simples e rápido
+            MeshTarget target = h.GetComponentInParent<MeshTarget>();
+
+            // 2) Se não achou, tenta procurar nos filhos do root (caso o MeshTarget esteja abaixo do root)
+            if (target == null)
+                target = h.transform.root.GetComponentInChildren<MeshTarget>(true);
+
+            // 3) fallback: sobe manualmente na hierarquia (funciona mesmo com objetos inativos)
+            if (target == null)
+            {
+                Transform t = h.transform;
+                while (t != null && target == null)
+                {
+                    target = t.GetComponent<MeshTarget>();
+                    t = t.parent;
+                }
+            }
+
+            if (target == null)
+            {
+                UnityEngine.Debug.Log($"No MeshTarget found for collider {h.name}");
+                return;
+            }
+
+            UnityEngine.Debug.Log(target.name);
+            DetachLimbs(target.gameObject);
+            Cut(target, transform.position, transform.forward, null, OnCreated);
         }
 
         void OnCreated(Info info, MeshCreationData cData)
@@ -75,8 +115,6 @@ namespace DynamicMeshCutter
             {
                 if (go == null) continue;
                 foreach (Transform t in go.transform) t.gameObject.layer = LayerMask.NameToLayer("Corte");
-                //go.layer = LayerMask.NameToLayer("Corte"); // <<< troque "Corte" pela layer que quiser
-                UnityEngine.Debug.Log(go.layer);
             }
         }
 
@@ -86,8 +124,10 @@ namespace DynamicMeshCutter
             foreach (var t in limbs)
             {
                 if (t.gameObject == targetRoot) continue;
-                if (t.CompareTag("armature")) continue;
                 
+                //Seta como corte
+                //t.gameObject.layer = LayerMask.NameToLayer("Corte");
+
                 // unparentar e habilitar física para "dropar"
                 Transform limb = t;
                 limb.SetParent(null, true); // worldPositionStays = true
@@ -99,12 +139,20 @@ namespace DynamicMeshCutter
                     rb.mass = 1f;
                     rb.interpolation = RigidbodyInterpolation.Interpolate;
                 }
-                if (limb.GetComponent<Collider>() == null)
+
+                //Limpa os bitmap para evitar de passar pelo chão
+                if (limb.GetComponent<Collider>() != null)
+                {
+                    var col = limb.GetComponent<Collider>();
+                    col.excludeLayers = 0;
+                }
+
+                /*if (limb.GetComponent<Collider>() == null)
                 {
                     // tenta adicionar um BoxCollider simples (ajuste conforme necessário)
                     var bc = limb.gameObject.AddComponent<BoxCollider>();
                     // opcional: ajustar bc.center/size manualmente no inspector
-                }
+                }*/
                 
             }
         }

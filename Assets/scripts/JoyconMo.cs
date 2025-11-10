@@ -48,6 +48,12 @@ public class JoyconSwordController : MonoBehaviour
     private bool firstFrame = true;
     private Quaternion previousTarget;
 
+
+    // MOD: novo campo mínimo para o Rigidbody
+    Rigidbody swordRb;
+    // MOD: armazenar target calculado em Update e aplicado em FixedUpdate
+    private Quaternion targetRotation;
+
     void Start()
     {
         joycons = (JoyconManager.Instance != null) ? JoyconManager.Instance.j : new List<Joycon>();
@@ -55,11 +61,13 @@ public class JoyconSwordController : MonoBehaviour
         firstFrame = true;
         previousTarget = transform.rotation;
 
-        if (playerBody != null)
-        {
-            lastPlayerBodyRotation = playerBody.rotation;
-            haveLastPlayerRot = true;
-        }
+        // MOD
+        swordRb = GetComponent<Rigidbody>();
+        Debug.Log(swordRb);
+
+        lastPlayerBodyRotation = playerBody.rotation;
+        haveLastPlayerRot = true;
+        
     }
 
     void Update()
@@ -84,18 +92,20 @@ public class JoyconSwordController : MonoBehaviour
                 QuickRecalibrate();
             }
         }
-        
+
         // Debugg
-        if (j.GetButtonDown(Joycon.Button.DPAD_UP))
+        /*if (j.GetButtonDown(Joycon.Button.DPAD_UP))
         {
             Debug.Log(j.GetGyro().magnitude);
             cutter.Cut();
         }
+        //MOVI PARA ONCOLISSION DETECTION
         if (j.GetGyro().magnitude >= velocidadeParaTrigger)
         {
             Debug.Log("Trigou");
+            j.SetRumble(80, 160, 0.6f, 50);
             cutter.Cut();
-        }
+        }*/
 
         // atualiza calibOffset se o player body rotacionou (compensação dinâmica)
         if (playerBody != null)
@@ -163,7 +173,8 @@ public class JoyconSwordController : MonoBehaviour
         previousTarget = target;
 
         // aplica smoothing adaptado ao deltaTime
-        if (applyRotation)
+        // MOD TROQUEI PRO FIXEDUPDATE
+        /*if (applyRotation)
         {
             if (rotationSmoothing <= 0f || firstFrame)
             {
@@ -175,10 +186,61 @@ public class JoyconSwordController : MonoBehaviour
                 float t = 1f - Mathf.Pow(1f - rotationSmoothing, dt * 60f);
                 transform.rotation = Quaternion.Slerp(transform.rotation, target, t);
             }
+        }*/
+        targetRotation = target;
+
+        //MOD fazer ela seguir o pai
+        transform.position = (transform.parent.position);
+        //Debug.Log(swordRb.position);
+        //Debug.Log(transform.position);
+
+        // OBS: NÃO setamos firstFrame=false aqui — vamos fazer na FixedUpdate
+        //firstFrame = false;
+    }
+
+    void FixedUpdate()
+    {
+        // MOD: aplicamos a rotação aqui via Rigidbody (se existir), senão caímos de volta para transform.rotation
+        if (!applyRotation) return;
+
+        if (swordRb != null)
+        {
+
+            if (rotationSmoothing <= 0f || firstFrame)
+            {
+                swordRb.MoveRotation(targetRotation);
+            }
+            else
+            {
+                float dt = Mathf.Max(0.0001f, Time.fixedDeltaTime);
+                float t = 1f - Mathf.Pow(1f - rotationSmoothing, dt * 60f); // mesma fórmula, com fixedDeltaTime
+                Quaternion newRot = Quaternion.Slerp(swordRb.rotation, targetRotation, t);
+                swordRb.MoveRotation(newRot);
+            }
         }
 
-        firstFrame = false;
+        // MOD: após a primeira aplicação em FixedUpdate, marcamos que não é mais o primeiro frame
+        if (firstFrame) firstFrame = false;
     }
+    
+    void OnCollisionEnter(Collision col)
+    {
+        if (col == null) return;
+        if (joycons == null || joycons.Count <= jcIndex) return;
+
+        Joycon joy = joycons[jcIndex];
+
+        Debug.Log("Colidi com: " + col.gameObject.name);
+
+        //O layer de corter é o nover
+        if ((joy.GetGyro().magnitude >= velocidadeParaTrigger) && col.gameObject.layer == LayerMask.NameToLayer("Corte"))
+        {
+            Debug.Log("Trigou");
+            joy.SetRumble(80, 160, 0.6f, 50);
+            cutter.Cut();
+        }
+    }
+
 
     /// <summary>
     /// Calibração "centralizante": alinha a espada para a orientação da calibrationReference.
