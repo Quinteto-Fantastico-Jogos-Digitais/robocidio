@@ -8,6 +8,9 @@ public class EnemyAI : MonoBehaviour
     private EngagementTracker targetEngagement;
     private EngagementTracker myEngagementTracker;
     
+    private Transform playerTarget;
+    private EngagementTracker playerEngagement;
+    
     [Header("Detecção e Alvos")]
     public float detectionRadius = 15f;
     public LayerMask targetLayerMask;
@@ -15,9 +18,13 @@ public class EnemyAI : MonoBehaviour
     [Header("Configurações de Combate")]
     public float attackDamage = 10f;
     public float attackRange = 2f;
+    public float attackRate = 1.5f; 
+    private float nextAttackTime = 0f;
     
     void Awake()
     {
+        NavMeshHit hit;
+
         if (!TryGetComponent(out agent))
         {
             Debug.LogError("EnemyAI requer um NavMeshAgent! Adicione o componente ao GameObject: " + gameObject.name);
@@ -31,8 +38,31 @@ public class EnemyAI : MonoBehaviour
             enabled = false;
             return;
         }
+        
+        GameObject playerObject = GameObject.FindWithTag("Player");
+        if (playerObject != null)
+        {
+            playerTarget = playerObject.transform;
+            playerEngagement = playerTarget.GetComponent<EngagementTracker>();
+            
+            if (playerEngagement == null)
+            {
+                Debug.LogWarning("O Player precisa do componente EngagementTracker para ser perseguido!");
+            }
+        }
+        else
+        {
+            Debug.LogError("O GameObject com a tag 'Player' não foi encontrado na cena!");
+        }
 
         agent.stoppingDistance = attackRange;
+
+        if (!NavMesh.SamplePosition(transform.position, out hit, 1.0f, NavMesh.AllAreas))
+        {
+            Debug.LogWarning(
+                $"🚨 O GameObject '{gameObject.name}' não consegue encontrar o NavMesh. " +
+                "Certifique-se de que o chão da cena foi 'cozido' (Baked) corretamente para o NavMesh.");
+        }
     }
 
     void Update()
@@ -45,9 +75,10 @@ public class EnemyAI : MonoBehaviour
             
             float distanceToTarget = Vector3.Distance(transform.position, currentTarget.position);
             
-            if (distanceToTarget <= attackRange + 0.1f)
+            if (distanceToTarget <= attackRange + 0.1f && Time.time >= nextAttackTime)
             {
                 AttackTarget(); 
+                nextAttackTime = Time.time + attackRate;
             }
         }
         else
@@ -61,38 +92,31 @@ public class EnemyAI : MonoBehaviour
 
     void FindNewTarget()
     {
-        // 1. REGRA DE RETALIAÇÃO (PRIORIDADE MÁXIMA)
         if (myEngagementTracker.IsTargeted && myEngagementTracker.CurrentTracker != null)
         {
             Transform retaliator = myEngagementTracker.CurrentTracker;
             EngagementTracker retaliatorStatus = retaliator.GetComponent<EngagementTracker>();
             
-            // CRUCIAL: Trava o rastreador atual
             myEngagementTracker.StartTracking(retaliator);
             
             if (currentTarget != retaliator)
             {
-                // Libera o alvo anterior (se eu estava perseguindo outro alguém antes de ser atacado)
                 if (currentTarget != null && targetEngagement != null)
                 {
                     targetEngagement.StopTracking(this.transform);
                 }
 
-                // Configura a retaliação
                 currentTarget = retaliator;
                 targetEngagement = retaliatorStatus;
             }
-            // O retorno garante que o cubo NUNCA mude de alvo enquanto estiver sendo atacado
             return; 
         }
         
-        // 2. BUSCA NORMAL (Se não está em retaliação)
         Collider[] targets = Physics.OverlapSphere(transform.position, detectionRadius, targetLayerMask);
         float closestDistance = Mathf.Infinity;
         Transform bestTarget = null;
         EngagementTracker bestTargetStatus = null;
         
-        // A. Manter o Alvo Atual (Sticky Target)
         if (currentTarget != null)
         {
             if (!IsTargetInSphere(currentTarget, targets))
@@ -112,7 +136,6 @@ public class EnemyAI : MonoBehaviour
             }
         }
         
-        // B. Procurar Novos Alvos (ou um alvo mais próximo)
         foreach (Collider target in targets)
         {
             if (target.transform == transform || target.transform == currentTarget) 
@@ -122,7 +145,6 @@ public class EnemyAI : MonoBehaviour
             if (targetStatus == null)
                 continue;
 
-            // REGRA DE EXCLUSÃO
             if (targetStatus.IsTargeted)
             {
                 continue; 
@@ -138,10 +160,8 @@ public class EnemyAI : MonoBehaviour
             }
         }
         
-        // 3. ATUALIZAÇÃO E MARCAÇÃO DE ESTADO (Com Correção de Roubo)
         if (currentTarget != bestTarget)
         {
-            // Libera o alvo anterior SOMENTE se EU sou o rastreador.
             if (currentTarget != null && targetEngagement != null && targetEngagement.CurrentTracker == this.transform)
             {
                 targetEngagement.StopTracking(this.transform);
@@ -153,6 +173,16 @@ public class EnemyAI : MonoBehaviour
             if (currentTarget != null && targetEngagement != null)
             {
                 targetEngagement.StartTracking(this.transform);
+            }
+        }
+        
+        if (currentTarget == null && playerTarget != null && playerEngagement != null)
+        {
+            if (!playerEngagement.IsTargeted || playerEngagement.CurrentTracker == this.transform)
+            {
+                currentTarget = playerTarget;
+                targetEngagement = playerEngagement;
+                playerEngagement.StartTracking(this.transform);
             }
         }
     }
@@ -176,6 +206,13 @@ public class EnemyAI : MonoBehaviour
         Vector3 lookAtPos = currentTarget.position;
         lookAtPos.y = transform.position.y;
         transform.LookAt(lookAtPos);
+        
+        Health targetHealth = currentTarget.GetComponent<Health>();
+        
+        if (targetHealth != null)
+        {
+            targetHealth.TakeDamage(attackDamage); 
+        }
     }
     
     private void OnDrawGizmosSelected()
