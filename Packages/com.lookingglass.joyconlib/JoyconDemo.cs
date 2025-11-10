@@ -26,11 +26,14 @@ public class JoyconDemo : MonoBehaviour {
     {
         gyro = new Vector3(0, 0, 0);
         accel = new Vector3(0, 0, 0);
+        
         // get the public Joycon array attached to the JoyconManager in scene
         joycons = JoyconManager.Instance.j;
-		if (joycons.Count < jc_ind+1){
-			Destroy(gameObject);
-		}
+        if (joycons.Count < jc_ind + 1)
+        {
+            Destroy(gameObject);
+        }
+        
         rb = GetComponent<Rigidbody>();
 	}
 
@@ -63,10 +66,10 @@ void Update () {
         gyro = j.GetGyro();
         accel = j.GetAccel();
         orientation = j.GetVector();
-		Debug.Log(stick);
-		Debug.Log(gyro);
-		Debug.Log(accel);
-		Debug.Log(orientation);
+		Debug.Log("Stick:" + stick);
+		Debug.Log("Gyro:" + gyro);
+		Debug.Log("ACCEL:" + accel);
+		Debug.Log("Vetor:" + orientation);
 
         // Cor do objeto só para feedback
 		//	if (j.GetButton(Joycon.Button.DPAD_UP))

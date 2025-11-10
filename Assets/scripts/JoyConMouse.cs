@@ -1,25 +1,38 @@
 using UnityEngine;
 
-// Attach to any GameObject to make it behave like a mouse cursor using Joy-Con gyro.
+// Attach to any GameObject to make it behave like a mouse cursor using Joy-Con accel.
 // Requires your Joycon library (JoyconManager.Instance.j).
-public class JoyConMouse : MonoBehaviour
+public class JoyConMouseAccel : MonoBehaviour
 {
-    public float sensitivity = 18f;   // bigger -> faster
-    public float smoothing = 0.85f;   // 0..1, closer to 1 = smoother
-    public float deadzone = 0.02f;
-    public bool invertX = false, invertY = true;
-    public bool gyroIsRadians = false; // set true if gyro returns rad/s
-    [SerializeField]
+    [Header("Movement")]
+    public float sensitivity = 600f;   // bigger -> faster (tweak)
+    [Range(0f, 0.99f)] public float smoothing = 0.85f;   // 0..1, closer to 1 = smoother
+    public float deadzone = 0.02f;    // ignore tiny noise
+    public float pixelScale = 10f;    // how many pixels per accel unit (tweak)
+
+    [Header("Axes")]
+    public bool invertX = false;
+    public bool invertY = true;
+
+    [Header("Accel options")]
+    public bool removeGravity = true; // try true if accel includes gravity (often yes)
+    public Vector3 gravityEstimate = new Vector3(0f, -1f, 0f); // world gravity direction for subtraction (adjust if needed)
+    public float gravityBlend = 0.98f; // low-pass filter speed to estimate gravity if removeGravity=true
+
+    [Header("References")]
     public Camera cam;
 
+    // internal
     Vector2 screenCursor;    // pixel coordinates
     Vector2 vel = Vector2.zero;
     Vector2 screen;
+    Vector3 gravityLowPass = Vector3.zero; // for estimating gravity
 
     void Start()
     {
         screen = new Vector2(Screen.width, Screen.height);
         screenCursor = screen * 0.5f;
+        gravityLowPass = gravityEstimate; // seed
     }
 
     void Update()
@@ -28,27 +41,40 @@ public class JoyConMouse : MonoBehaviour
         if (list == null || list.Count == 0) return;
         var j = list[0];
 
-        // recenter button
+        // recenter button (same as before)
         if (j.GetButtonDown(Joycon.Button.SHOULDER_2)) j.Recenter();
 
-        // read gyro and prepare angular vector (tweak mapping if needed)
-        Vector3 g = j.GetGyro();               // typical: deg/s or rad/s
-        Vector2 ang = new Vector2(g.x, g.y);   // map axes (swap if it feels wrong)
-        if (gyroIsRadians) ang *= Mathf.Rad2Deg;
+        // read accel (typical: Gs)
+        Vector3 a = j.GetAccel(); // usually in G (1 = 1g) or m/s^2 depending on library
 
-        if (Mathf.Abs(ang.x) < deadzone) ang.x = 0;
-        if (Mathf.Abs(ang.y) < deadzone) ang.y = 0;
+        // optional: estimate and remove gravity with low-pass filter
+        Vector3 linear = a;
+        if (removeGravity)
+        {
+            // low-pass filter to estimate gravity component in device space
+            gravityLowPass = Vector3.Lerp(gravityLowPass, a, 1f - gravityBlend);
+            linear = a - gravityLowPass;
+        }
 
-        Vector2 delta = new Vector2((invertX ? -1 : 1) * ang.x,
-                                    (invertY ? -1 : 1) * ang.y) * (sensitivity * Time.deltaTime);
+        // choose which axes to use for cursor movement; map device axes to screen axes.
+        // You may need to swap x/y depending on how the Joy-Con is held.
+        Vector2 accel2D = new Vector2(linear.x, linear.y);
 
-        // smoothing and pixel scale
+        // apply deadzone per component
+        if (Mathf.Abs(accel2D.x) < deadzone) accel2D.x = 0f;
+        if (Mathf.Abs(accel2D.y) < deadzone) accel2D.y = 0f;
+
+        // compute delta in pixels (scale by sensitivity and Time.deltaTime so it's framerate-independent)
+        Vector2 delta = new Vector2((invertX ? -1f : 1f) * accel2D.x,
+                                    (invertY ? -1f : 1f) * accel2D.y) * (sensitivity * Time.deltaTime);
+
+        // smoothing and accumulate
         vel = Vector2.Lerp(vel, delta, 1f - smoothing);
-        screenCursor += new Vector2(vel.x, -vel.y) * 10f; // 10 = pixel scale (tune or expose if desired)
+        screenCursor += new Vector2(vel.x, -vel.y) * pixelScale;
 
         // clamp to screen
-        screenCursor.x = Mathf.Clamp(screenCursor.x, 0, screen.x);
-        screenCursor.y = Mathf.Clamp(screenCursor.y, 0, screen.y);
+        screenCursor.x = Mathf.Clamp(screenCursor.x, 0f, screen.x);
+        screenCursor.y = Mathf.Clamp(screenCursor.y, 0f, screen.y);
 
         // convert to world position while keeping original Z
         if (cam != null)
@@ -59,7 +85,7 @@ public class JoyConMouse : MonoBehaviour
         }
         else
         {
-            // fallback: move in 2D using orthographic assumptions
+            // fallback: move in 2D using normalized screen coords
             transform.position = new Vector3(screenCursor.x / screen.x - 0.5f, screenCursor.y / screen.y - 0.5f, transform.position.z);
         }
     }

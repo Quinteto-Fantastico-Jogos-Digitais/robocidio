@@ -1,107 +1,166 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CharacterController))]
+/// <summary>
+/// PlayerMovementRefactor (ajustado: stick sensitivity + response curve + faster defaults)
+/// - Player (cylinder) gira no yaw (eixo Y) com stick de look
+/// - Câmera filha gira apenas no pitch (eixo X)
+/// - Movement twin-stick no plano horizontal relativo ao player
+/// - Parâmetros para ajustar sensibilidade e curva de resposta do stick
+/// </summary>
 public class PlayerMovement : MonoBehaviour
 {
-    public Camera playerCamera;
-    public float walkSpeed = 6f;
-    public float runSpeed = 12f;
-    public float jumpPower = 7f;
-    public float gravity = 10f;
-    public float lookSpeed = 2f;
-    public float lookXLimit = 45f;
-    public float defaultHeight = 2f;
-    public float crouchHeight = 1f;
-    public float crouchSpeed = 3f;
+    [Header("Joycon indices")]
+    public int camJcIndex = 1;     // stick para look (yaw/pitch)
+    public int playerJcIndex = 0;  // stick para mover o player
 
-    private Vector3 moveDirection = Vector3.zero;
-    private float rotationX = 0;
-    private CharacterController characterController;
+    [Header("Refs")]
+    public Transform cameraTransform; // câmera filha (se vazio tenta Camera.main)
 
-    private bool canMove = true;
-    
-    // Variáveis para guardar a velocidade original ao agachar
-    private float originalWalkSpeed;
-    private float originalRunSpeed;
+    [Header("Movement")]
+    public float moveSpeed = 4f;
+    public float moveSmoothTime = 0.08f;
+
+    [Header("Look (tune these)")]
+    public float cameraYawSpeed = 360f;   // deg/s por unidade do stick horizontal (aumentado)
+    public float cameraPitchSpeed = 240f; // deg/s por unidade do stick vertical (aumentado)
+    [Tooltip("Tempo de suavização para o look. 0 = sem suavização (imediato).")]
+    public float lookSmoothTime = 0.02f;  // reduzido para look mais responsivo
+    public float minPitch = -45f;
+    public float maxPitch = 60f;
+    public bool invertY = false;
+
+    [Header("Stick tuning")]
+    [Tooltip("Multiplicador simples para a magnitude do stick (1 = default, >1 = mais sensível).")]
+    [Range(0.1f, 5f)]
+    public float stickSensitivity = 1.6f; // aumenta sensibilidade do stick
+
+    [Tooltip("Expoente aplicado à entrada do stick: <1 deixa o stick MAIS sensível perto do centro; >1 deixa MAIS fino no centro.")]
+    [Range(0.2f, 2f)]
+    public float stickResponseExponent = 0.85f; // <1 => mais sensível no centro
+
+    [Header("Input")]
+    [Range(0f, 0.5f)]
+    public float deadZone = 0.08f; // ligeiramente menor que antes
+
+    // internos
+    private List<Joycon> joycons;
+    private Vector3 currentVelocity = Vector3.zero;
+    private Vector3 velRef = Vector3.zero;
+
+    private float currentYawVel = 0f;
+    private float currentPitchVel = 0f;
+
+    private float pitch = 0f;
 
     void Start()
     {
-        characterController = GetComponent<CharacterController>();
+        joycons = (JoyconManager.Instance != null) ? JoyconManager.Instance.j : new List<Joycon>();
 
-        // MODIFICAÇÃO: O cursor agora começa livre e visível.
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        if (cameraTransform == null && Camera.main != null)
+            cameraTransform = Camera.main.transform;
 
-        // Guarda as velocidades originais para restaurá-las depois de agachar
-        originalWalkSpeed = walkSpeed;
-        originalRunSpeed = runSpeed;
+        if (cameraTransform != null)
+        {
+            // inicializa pitch com rotação local atual da câmera (normalizada)
+            pitch = NormalizeAngle(cameraTransform.localEulerAngles.x);
+            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        }
     }
 
     void Update()
     {
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
+        float camX = 0f, camY = 0f;
+        float moveX = 0f, moveY = 0f;
 
-        bool isRunning = Input.GetKey(KeyCode.LeftShift);
-        float curSpeedX = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
-        float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
-        float movementDirectionY = moveDirection.y;
-        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-
-        if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
+        if (joycons != null)
         {
-            moveDirection.y = jumpPower;
-        }
-        else
-        {
-            moveDirection.y = movementDirectionY;
-        }
-
-        if (!characterController.isGrounded)
-        {
-            moveDirection.y -= gravity * Time.deltaTime;
-        }
-
-        // MODIFICAÇÃO: Lógica de agachar melhorada para não resetar a velocidade toda hora
-        if (Input.GetKey(KeyCode.R) && canMove)
-        {
-            characterController.height = crouchHeight;
-            walkSpeed = crouchSpeed;
-            runSpeed = crouchSpeed;
-        }
-        else
-        {
-            characterController.height = defaultHeight;
-            walkSpeed = originalWalkSpeed;
-            runSpeed = originalRunSpeed;
-        }
-
-        characterController.Move(moveDirection * Time.deltaTime);
-
-        // MODIFICAÇÃO: Toda a lógica de câmera agora está condicionada ao botão direito do mouse.
-        if (canMove)
-        {
-            // Verifica se o botão direito do mouse (1) está sendo pressionado
-            if (Input.GetMouseButton(1))
+            if (joycons.Count > camJcIndex && joycons[camJcIndex] != null)
             {
-                // Trava e esconde o cursor ENQUANTO o botão estiver pressionado
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-
-                // Executa a lógica de rotação da câmera
-                rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
-                rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-                playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-                transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
+                var s = joycons[camJcIndex].GetStick();
+                if (s != null && s.Length >= 2) { camX = s[0]; camY = s[1]; }
             }
-            else
+
+            if (joycons.Count > playerJcIndex && joycons[playerJcIndex] != null)
             {
-                // Libera e mostra o cursor QUANDO o botão for solto
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                var s = joycons[playerJcIndex].GetStick();
+                if (s != null && s.Length >= 2) { moveX = s[0]; moveY = s[1]; }
             }
         }
+
+        // deadzone circular (para sticks)
+        Vector2 camStick = new Vector2(camX, camY);
+        if (camStick.magnitude < deadZone) { camX = camY = 0f; }
+
+        Vector2 moveStick = new Vector2(moveX, moveY);
+        if (moveStick.magnitude < deadZone) { moveX = moveY = 0f; }
+
+        // aplica sensibilidade e curva ao stick de look
+        camX = ApplyStickResponse(camX);
+        camY = ApplyStickResponse(camY);
+
+        float dt = Time.deltaTime;
+
+        // --- Look ---
+        // yaw no player (rotaciona o corpo)
+        float yawDelta = camX * cameraYawSpeed * dt;
+        float targetYaw = NormalizeAngle(transform.eulerAngles.y + yawDelta);
+
+        // Se lookSmoothTime <= 0 fazemos aplicação direta (imediato)
+        float smoothYaw;
+        if (lookSmoothTime <= 0f)
+            smoothYaw = targetYaw;
+        else
+            smoothYaw = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetYaw, ref currentYawVel, lookSmoothTime);
+
+        transform.rotation = Quaternion.Euler(transform.eulerAngles.x, smoothYaw, transform.eulerAngles.z);
+
+        // pitch na câmera filha (apenas X)
+        float effectiveCamY = invertY ? -camY : camY;
+        float targetPitch = pitch - effectiveCamY * cameraPitchSpeed * dt;
+        targetPitch = Mathf.Clamp(targetPitch, minPitch, maxPitch);
+
+        if (lookSmoothTime <= 0f)
+            pitch = targetPitch;
+        else
+            pitch = Mathf.SmoothDampAngle(pitch, targetPitch, ref currentPitchVel, lookSmoothTime);
+
+        if (cameraTransform != null)
+        {
+            Vector3 camLocalEuler = cameraTransform.localEulerAngles;
+            camLocalEuler.x = pitch;
+            cameraTransform.localEulerAngles = camLocalEuler;
+        }
+
+        // --- Movement (player-relative) ---
+        Vector3 desiredVelocity = (transform.forward * moveY + transform.right * moveX) * moveSpeed;
+        currentVelocity = Vector3.SmoothDamp(currentVelocity, desiredVelocity, ref velRef, moveSmoothTime);
+        transform.position += currentVelocity * dt;
+    }
+
+    /// <summary>
+    /// Aplica multiplicador e curva de resposta ao input do stick.
+    /// Exemplo: exponent < 1 -> mais sensível perto do centro.
+    /// Mantém sinal do input.
+    /// </summary>
+    private float ApplyStickResponse(float value)
+    {
+        // aplica multiplicador primeiro
+        float v = Mathf.Clamp(value * stickSensitivity, -1f, 1f);
+
+        // aplica curva (preserva sinal)
+        float sign = Mathf.Sign(v);
+        float mag = Mathf.Abs(v);
+
+        // se exponent == 1, fica linear
+        float adjusted = Mathf.Pow(mag, stickResponseExponent);
+
+        return sign * adjusted;
+    }
+
+    private float NormalizeAngle(float a)
+    {
+        if (a > 180f) a -= 360f;
+        return a;
     }
 }
