@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DynamicMeshCutter;
+using System;
 
 /// <summary>
 /// JoyconSwordController (versão com CalibrateCenter imediata)
@@ -21,7 +22,6 @@ public class JoyconSwordController : MonoBehaviour
     private Quaternion calibOffset = Quaternion.identity; // offset: final = calibOffset * raw
 
     public float velocidadeParaTrigger = 350f; // deg/s
-    
 
     // último estado do player para compensar rotação dinâmica
     private Quaternion lastPlayerBodyRotation = Quaternion.identity;
@@ -53,13 +53,6 @@ public class JoyconSwordController : MonoBehaviour
     // MOD: armazenar target calculado em Update e aplicado em FixedUpdate
     private Quaternion targetRotation;
 
-    public float pushStrength = 2f;        // ajuste fino
-    public float pushUpFactor = 0.1f;      // empurra um pouco pra cima
-    public bool useAddForceAtPoint = true;
-
-    //Lista de dados que verifica hit
-    private List<int> sides = new List<int> { 1, 2, 3, 4, 5, 6 };
-
     void Start()
     {
         joycons = (JoyconManager.Instance != null) ? JoyconManager.Instance.j : new List<Joycon>();
@@ -73,7 +66,6 @@ public class JoyconSwordController : MonoBehaviour
 
         lastPlayerBodyRotation = playerBody.rotation;
         haveLastPlayerRot = true;
-        
     }
 
     void Update()
@@ -211,7 +203,6 @@ public class JoyconSwordController : MonoBehaviour
 
         if (swordRb != null)
         {
-
             if (rotationSmoothing <= 0f || firstFrame)
             {
                 swordRb.MoveRotation(targetRotation);
@@ -228,8 +219,8 @@ public class JoyconSwordController : MonoBehaviour
         // MOD: após a primeira aplicação em FixedUpdate, marcamos que não é mais o primeiro frame
         if (firstFrame) firstFrame = false;
     }
-    
-    void OnCollisionEnter(Collision col)
+
+    /*void OnCollisionEnter(Collision col)
     {
         if (col == null) return;
         if (joycons == null || joycons.Count <= jcIndex) return;
@@ -241,7 +232,7 @@ public class JoyconSwordController : MonoBehaviour
         //Se trigou na hora certa
         if ((joy.GetGyro().magnitude >= velocidadeParaTrigger) && col.gameObject.layer == LayerMask.NameToLayer("Corte"))
         {
-            
+
             //Testa se vai dar bom.
             int index = Random.Range(0, sides.Count);
             int result = sides[index];
@@ -266,6 +257,20 @@ public class JoyconSwordController : MonoBehaviour
                 sides.RemoveAt(index);
             }
         }
+    }*/
+    
+    void OnTriggerEnter(Collider other)
+    {
+        if (other == null) return;
+        if (joycons == null || joycons.Count <= jcIndex) return;
+
+        Joycon joy = joycons[jcIndex];
+
+        Debug.Log("Colidi com: " + other.gameObject.name);
+
+        joy.SetRumble(80, 160, 0.6f, 100);
+        cutter.Cut();
+        
     }
 
     /// <summary>

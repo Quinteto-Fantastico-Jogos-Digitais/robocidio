@@ -1,3 +1,4 @@
+using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -18,9 +19,15 @@ public class EnemyAI : MonoBehaviour
     [Header("Configurações de Combate")]
     public float attackDamage = 10f;
     public float attackRange = 2f;
-    public float attackRate = 1.5f; 
+    public float attackRate = 1.5f;
     private float nextAttackTime = 0f;
-    
+
+    private Animator animator;
+    private static readonly int SpeedHash = Animator.StringToHash("Speed");
+    private static readonly int AttackHash = Animator.StringToHash("Attack");
+    private static readonly int AttackIndexHash = Animator.StringToHash("AttackIndex");
+    private static readonly int InRangeHash = Animator.StringToHash("inRange");
+
     void Awake()
     {
         NavMeshHit hit;
@@ -31,20 +38,20 @@ public class EnemyAI : MonoBehaviour
             enabled = false;
             return;
         }
-        
+
         if (!TryGetComponent(out myEngagementTracker))
         {
             Debug.LogError("EnemyAI requer o EngagementTracker para funcionar.");
             enabled = false;
             return;
         }
-        
+
         GameObject playerObject = GameObject.FindWithTag("Player");
         if (playerObject != null)
         {
             playerTarget = playerObject.transform;
             playerEngagement = playerTarget.GetComponent<EngagementTracker>();
-            
+
             if (playerEngagement == null)
             {
                 Debug.LogWarning("O Player precisa do componente EngagementTracker para ser perseguido!");
@@ -65,6 +72,11 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        animator = transform.gameObject.GetComponent<Animator>();
+    }
+
     void Update()
     {
         FindNewTarget();
@@ -72,13 +84,27 @@ public class EnemyAI : MonoBehaviour
         if (currentTarget != null)
         {
             agent.SetDestination(currentTarget.position);
+
+            //Avisa a velocidade do divo
+            float speed = agent.velocity.magnitude;
             
             float distanceToTarget = Vector3.Distance(transform.position, currentTarget.position);
             
-            if (distanceToTarget <= attackRange + 0.1f && Time.time >= nextAttackTime)
+            if (distanceToTarget <= attackRange + 0.1f)
             {
-                AttackTarget(); 
-                nextAttackTime = Time.time + attackRate;
+                animator.SetBool(InRangeHash, true);
+                if(Time.time >= nextAttackTime)
+                {
+                    animator.SetFloat(SpeedHash, 0);
+                    AttackTarget(); 
+                    nextAttackTime = Time.time + attackRate;    
+                }
+                
+            }
+            else
+            {
+                animator.SetBool(InRangeHash, false);
+                animator.SetFloat(SpeedHash, speed);
             }
         }
         else
@@ -92,6 +118,7 @@ public class EnemyAI : MonoBehaviour
 
     void FindNewTarget()
     {
+        /*
         if (myEngagementTracker.IsTargeted && myEngagementTracker.CurrentTracker != null)
         {
             Transform retaliator = myEngagementTracker.CurrentTracker;
@@ -174,7 +201,7 @@ public class EnemyAI : MonoBehaviour
             {
                 targetEngagement.StartTracking(this.transform);
             }
-        }
+        }*/
         
         if (currentTarget == null && playerTarget != null && playerEngagement != null)
         {
@@ -187,7 +214,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
     
-    private bool IsTargetInSphere(Transform targetTransform, Collider[] targets)
+    /*private bool IsTargetInSphere(Transform targetTransform, Collider[] targets)
     {
         foreach (Collider collider in targets)
         {
@@ -197,7 +224,7 @@ public class EnemyAI : MonoBehaviour
             }
         }
         return false;
-    }
+    }*/
     
     void AttackTarget()
     {
@@ -206,18 +233,31 @@ public class EnemyAI : MonoBehaviour
         Vector3 lookAtPos = currentTarget.position;
         lookAtPos.y = transform.position.y;
         transform.LookAt(lookAtPos);
+
+        //Trabalha com as animações
+        int index = Random.Range(0, 3); // 0,1,2 (int)
+        animator.SetFloat(AttackIndexHash, index);
+        animator.SetTrigger(AttackHash);
         
-        Health targetHealth = currentTarget.GetComponent<Health>();
+        //Health targetHealth = currentTarget.GetComponent<Health>();
         
-        if (targetHealth != null)
+        /*if (targetHealth != null)
         {
             targetHealth.TakeDamage(attackDamage); 
-        }
+        }*/
     }
-    
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+    
+    public void die()
+    {
+        playerEngagement.StopTracking(this.transform);
     }
 }

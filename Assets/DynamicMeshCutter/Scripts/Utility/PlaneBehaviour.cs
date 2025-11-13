@@ -53,7 +53,7 @@ namespace DynamicMeshCutter
                         t = t.parent;
                     }
                 }*/
-
+                //PARA FUNCIONAR O COLLIDER DEVE ESTAR NA MESH!!!!
                 MeshTarget target = h.GetComponent<MeshTarget>();
 
                 if (target == null)
@@ -62,8 +62,14 @@ namespace DynamicMeshCutter
                     continue;
                 }
 
-                UnityEngine.Debug.Log(target.name);
-                DetachLimbs(target.gameObject);
+                //Se for inimigo chama a função de morrer
+                if (h.GetComponentInParent<EnemyAI>() != null)
+                {
+                    UnityEngine.Debug.Log("matou o veio");
+                    h.GetComponentInParent<EnemyAI>().die();
+                }
+
+                //DetachLimbs(target.gameObject);
                 Cut(target, transform.position, transform.forward, null, OnCreated);
             }
         }
@@ -103,8 +109,8 @@ namespace DynamicMeshCutter
                 return;
             }
 
-            UnityEngine.Debug.Log(target.name);
-            DetachLimbs(target.gameObject);
+            //UnityEngine.Debug.Log(target.name);
+            //DetachLimbs(target.gameObject);
             Cut(target, transform.position, transform.forward, null, OnCreated);
         }
 
@@ -112,11 +118,11 @@ namespace DynamicMeshCutter
         //depois de cortar aqui que cria o corpo morto
         {
             MeshCreation.TranslateCreatedObjects(info, cData.CreatedObjects, cData.CreatedTargets, Separation);
-            foreach (var go in cData.CreatedObjects)
+            /*foreach (var go in cData.CreatedObjects)
             {
                 if (go == null) continue;
                 foreach (Transform t in go.transform) t.gameObject.layer = LayerMask.NameToLayer("Corte");
-            }
+            }*/
         }
 
         void DetachLimbs(GameObject targetRoot)
@@ -141,13 +147,6 @@ namespace DynamicMeshCutter
                     rb.interpolation = RigidbodyInterpolation.Interpolate;
                 }
 
-                //Limpa os bitmap para evitar de passar pelo chão
-                if (limb.GetComponent<Collider>() != null)
-                {
-                    var col = limb.GetComponent<Collider>();
-                    col.excludeLayers = 0;
-                }
-
                 /*if (limb.GetComponent<Collider>() == null)
                 {
                     // tenta adicionar um BoxCollider simples (ajuste conforme necessário)
@@ -161,8 +160,6 @@ namespace DynamicMeshCutter
 
         void DebugDrawBox(Vector3 center, Vector3 halfExtents, Quaternion rotation, Color color)
         {
-
-            UnityEngine.Debug.Log("entrei nessa bomba");
 
             // desenha o box da lâmina
             Vector3[] corners = new Vector3[8];
@@ -178,8 +175,6 @@ namespace DynamicMeshCutter
                     forward * ((i & 4) == 0 ? -halfExtents.z : halfExtents.z);
             }
             
-            UnityEngine.Debug.Log(corners);
-
             UnityEngine.Debug.DrawLine(corners[0], corners[1], color, 5.0f);
             UnityEngine.Debug.DrawLine(corners[1], corners[3], color, 5.0f);
             UnityEngine.Debug.DrawLine(corners[3], corners[2], color, 5.0f);
