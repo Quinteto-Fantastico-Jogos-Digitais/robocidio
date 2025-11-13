@@ -48,11 +48,17 @@ public class JoyconSwordController : MonoBehaviour
     private bool firstFrame = true;
     private Quaternion previousTarget;
 
-
     // MOD: novo campo mínimo para o Rigidbody
     Rigidbody swordRb;
     // MOD: armazenar target calculado em Update e aplicado em FixedUpdate
     private Quaternion targetRotation;
+
+    public float pushStrength = 2f;        // ajuste fino
+    public float pushUpFactor = 0.1f;      // empurra um pouco pra cima
+    public bool useAddForceAtPoint = true;
+
+    //Lista de dados que verifica hit
+    private List<int> sides = new List<int> { 1, 2, 3, 4, 5, 6 };
 
     void Start()
     {
@@ -232,15 +238,35 @@ public class JoyconSwordController : MonoBehaviour
 
         Debug.Log("Colidi com: " + col.gameObject.name);
 
-        //O layer de corter é o nover
+        //Se trigou na hora certa
         if ((joy.GetGyro().magnitude >= velocidadeParaTrigger) && col.gameObject.layer == LayerMask.NameToLayer("Corte"))
         {
-            Debug.Log("Trigou");
-            joy.SetRumble(80, 160, 0.6f, 50);
-            cutter.Cut();
+            
+            //Testa se vai dar bom.
+            int index = Random.Range(0, sides.Count);
+            int result = sides[index];
+            Debug.Log($"🎲 Rolou: {result}");
+
+            //Se deu certo então corta
+            if (result == 1)
+            {
+                Debug.Log("✅ Deu 1! TRUE");
+
+                Debug.Log("Trigou");
+                joy.SetRumble(80, 160, 0.6f, 100);
+                cutter.Cut();
+
+                sides = new List<int> { 1, 2, 3, 4, 5, 6 };
+
+            }
+            else //Se rodou diferente de um então só empurra
+            {
+                joy.SetRumble(80, 160, 0.6f, 50);
+                Debug.Log("❌ Não deu 1. FALSE — removendo esse número...");
+                sides.RemoveAt(index);
+            }
         }
     }
-
 
     /// <summary>
     /// Calibração "centralizante": alinha a espada para a orientação da calibrationReference.

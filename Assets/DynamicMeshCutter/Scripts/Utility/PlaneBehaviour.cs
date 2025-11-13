@@ -25,20 +25,19 @@ namespace DynamicMeshCutter
                 }
             }*/
 
-            //UnityEngine.Debug.Log("cirr");
+            UnityEngine.Debug.Log("cirr");
 
-            Collider[] hits = Physics.OverlapBox(transform.position, transform.lossyScale, transform.rotation, cutLayer);
-            DebugDrawBox(transform.position, transform.lossyScale, transform.rotation, Color.green);
+            Collider[] hits = Physics.OverlapBox(transform.position, transform.lossyScale/2, transform.rotation, cutLayer);
+            DebugDrawBox(transform.position, transform.lossyScale/2, transform.rotation, Color.green);
             foreach (var h in hits)
             {
-                UnityEngine.Debug.Log(h.name);
                 //var target = h.GetComponentInParent<MeshTarget>();
                 //var target = h.GetComponentInChildren<MeshTarget>();
 
                 UnityEngine.Debug.Log($"Hit collider: {h.name} (root: {h.transform.root.name})");
 
                 // 1) Tenta o método simples e rápido
-                MeshTarget target = h.GetComponentInParent<MeshTarget>();
+                /*MeshTarget target = h.GetComponentInParent<MeshTarget>();
 
                 // 2) Se não achou, tenta procurar nos filhos do root (caso o MeshTarget esteja abaixo do root)
                 if (target == null)
@@ -53,7 +52,9 @@ namespace DynamicMeshCutter
                         target = t.GetComponent<MeshTarget>();
                         t = t.parent;
                     }
-                }
+                }*/
+
+                MeshTarget target = h.GetComponent<MeshTarget>();
 
                 if (target == null)
                 {
@@ -160,6 +161,9 @@ namespace DynamicMeshCutter
 
         void DebugDrawBox(Vector3 center, Vector3 halfExtents, Quaternion rotation, Color color)
         {
+
+            UnityEngine.Debug.Log("entrei nessa bomba");
+
             // desenha o box da lâmina
             Vector3[] corners = new Vector3[8];
             Vector3 right = rotation * Vector3.right;
@@ -173,11 +177,13 @@ namespace DynamicMeshCutter
                     up * ((i & 2) == 0 ? -halfExtents.y : halfExtents.y) +
                     forward * ((i & 4) == 0 ? -halfExtents.z : halfExtents.z);
             }
+            
+            UnityEngine.Debug.Log(corners);
 
-            UnityEngine.Debug.DrawLine(corners[0], corners[1], color);
-            UnityEngine.Debug.DrawLine(corners[1], corners[3], color);
-            UnityEngine.Debug.DrawLine(corners[3], corners[2], color);
-            UnityEngine.Debug.DrawLine(corners[2], corners[0], color);
+            UnityEngine.Debug.DrawLine(corners[0], corners[1], color, 5.0f);
+            UnityEngine.Debug.DrawLine(corners[1], corners[3], color, 5.0f);
+            UnityEngine.Debug.DrawLine(corners[3], corners[2], color, 5.0f);
+            UnityEngine.Debug.DrawLine(corners[2], corners[0], color, 5.0f);
 
             UnityEngine.Debug.DrawLine(corners[4], corners[5], color);
             UnityEngine.Debug.DrawLine(corners[5], corners[7], color);
