@@ -25,7 +25,7 @@ namespace DynamicMeshCutter
                 }
             }*/
 
-            UnityEngine.Debug.Log("cirr");
+            //UnityEngine.Debug.Log("cirr");
 
             Collider[] hits = Physics.OverlapBox(transform.position, transform.lossyScale/2, transform.rotation, cutLayer);
             DebugDrawBox(transform.position, transform.lossyScale/2, transform.rotation, Color.green);
@@ -65,7 +65,7 @@ namespace DynamicMeshCutter
                 //Se for inimigo chama a função de morrer
                 if (h.GetComponentInParent<EnemyAI>() != null)
                 {
-                    UnityEngine.Debug.Log("matou o veio");
+                    //UnityEngine.Debug.Log("matou o veio");
                     h.GetComponentInParent<EnemyAI>().die();
                 }
 
@@ -74,7 +74,7 @@ namespace DynamicMeshCutter
             }
         }
         
-        public void Cut(Collision col)
+        /*public void Cut(Collision col)
         {
 
             DebugDrawBox(transform.position, transform.lossyScale, transform.rotation, Color.green);
@@ -112,7 +112,7 @@ namespace DynamicMeshCutter
             //UnityEngine.Debug.Log(target.name);
             //DetachLimbs(target.gameObject);
             Cut(target, transform.position, transform.forward, null, OnCreated);
-        }
+        }*/
 
         void OnCreated(Info info, MeshCreationData cData)
         //depois de cortar aqui que cria o corpo morto

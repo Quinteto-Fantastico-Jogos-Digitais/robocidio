@@ -1,6 +1,6 @@
-using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -27,6 +27,12 @@ public class EnemyAI : MonoBehaviour
     private static readonly int AttackHash = Animator.StringToHash("Attack");
     private static readonly int AttackIndexHash = Animator.StringToHash("AttackIndex");
     private static readonly int InRangeHash = Animator.StringToHash("inRange");
+
+    private ZombieSpawner spawner;
+
+    private Coroutine attackCoroutine;
+
+    public bool tahAtacando = false;
 
     void Awake()
     {
@@ -75,6 +81,7 @@ public class EnemyAI : MonoBehaviour
     void Start()
     {
         animator = transform.gameObject.GetComponent<Animator>();
+        spawner = FindFirstObjectByType<ZombieSpawner>();
     }
 
     void Update()
@@ -95,9 +102,9 @@ public class EnemyAI : MonoBehaviour
                 animator.SetBool(InRangeHash, true);
                 if(Time.time >= nextAttackTime)
                 {
-                    animator.SetFloat(SpeedHash, 0);
-                    AttackTarget(); 
-                    nextAttackTime = Time.time + attackRate;    
+                    //Debug.Log("to em ti cuzão");
+                    AttackTarget();
+                    nextAttackTime = Time.time + attackRate;
                 }
                 
             }
@@ -111,7 +118,7 @@ public class EnemyAI : MonoBehaviour
         {
             if (agent.hasPath)
             {
-                 agent.ResetPath();
+                agent.ResetPath();
             }
         }
     }
@@ -205,12 +212,12 @@ public class EnemyAI : MonoBehaviour
         
         if (currentTarget == null && playerTarget != null && playerEngagement != null)
         {
-            if (!playerEngagement.IsTargeted || playerEngagement.CurrentTracker == this.transform)
-            {
+            //if (!playerEngagement.IsTargeted || playerEngagement.CurrentTracker == this.transform)
+            //{
                 currentTarget = playerTarget;
                 targetEngagement = playerEngagement;
-                playerEngagement.StartTracking(this.transform);
-            }
+                //playerEngagement.StartTracking(this.transform);
+            //}
         }
     }
     
@@ -229,13 +236,25 @@ public class EnemyAI : MonoBehaviour
     void AttackTarget()
     {
         if (currentTarget == null) return;
+        if (tahAtacando == true) return;
         
-        Vector3 lookAtPos = currentTarget.position;
-        lookAtPos.y = transform.position.y;
-        transform.LookAt(lookAtPos);
+        //freeze navmesh movement/rotation e zera velocidade
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        animator.SetFloat(SpeedHash, 0);
 
-        //Trabalha com as animações
-        int index = Random.Range(0, 3); // 0,1,2 (int)
+        agent.updatePosition = false;
+        agent.updateRotation = false;
+
+        //garantir que o zumbi olhe para o alvo (suave)
+        Vector3 lookPos = currentTarget.position;
+        lookPos.y = transform.position.y;
+        Quaternion wanted = Quaternion.LookRotation((lookPos - transform.position).normalized);
+        transform.rotation = Quaternion.Slerp(transform.rotation, wanted, 1f); 
+
+        // dispara animação
+        tahAtacando = true;
+        int index = Random.Range(1, 3);
         animator.SetFloat(AttackIndexHash, index);
         animator.SetTrigger(AttackHash);
         
@@ -245,6 +264,81 @@ public class EnemyAI : MonoBehaviour
         {
             targetHealth.TakeDamage(attackDamage); 
         }*/
+    }
+
+    /*void AttackTarget()
+    {
+        if (attackCoroutine != null) return; // evita double attack coroutines
+        attackCoroutine = StartCoroutine(AttackRoutine());
+    }
+
+    IEnumerator AttackRoutine()
+    {
+        if (currentTarget == null) { attackCoroutine = null; yield break; }
+
+        //freeze navmesh movement/rotation e zera velocidade
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+
+        agent.updatePosition = false;
+        agent.updateRotation = false;
+
+        //garantir que o zumbi olhe para o alvo (suave)
+        Vector3 lookPos = currentTarget.position;
+        lookPos.y = transform.position.y;
+        Quaternion wanted = Quaternion.LookRotation((lookPos - transform.position).normalized);
+        transform.rotation = Quaternion.Slerp(transform.rotation, wanted, 1f); 
+
+        // dispara animação
+        int index = Random.Range(0, 3);
+        animator.SetFloat(AttackIndexHash, index);
+        animator.SetTrigger(AttackHash);
+
+        // espera até que o estado de ataque termine — método robusto:
+        // assume que o estado de ataque tem tag "Attack" ou está em layer 0 com nome "Attack"
+        // você pode ajustar o nome do state ou usar Animation Events para detectar fim
+        float timeout = 2.5f; // fallback máximo em segundos (ajuste)
+        float timer = 0f;
+        bool attackStateEntered = false;
+
+        while (timer < timeout)
+        {
+            timer += Time.deltaTime;
+            var st = animator.GetCurrentAnimatorStateInfo(0);
+            // ajuste a condição para detectar seu state de attack
+            if (st.IsName("Attack") || st.IsTag("Attack"))
+            {
+                attackStateEntered = true;
+                // espera até sair do estado de attack
+                while (st.normalizedTime < 1f && timer < timeout)
+                {
+                    yield return null;
+                    timer += Time.deltaTime;
+                    st = animator.GetCurrentAnimatorStateInfo(0);
+                }
+                break;
+            }
+            yield return null;
+        }
+
+        // fallback: aguarda um tempo curto se a animação não foi detectada
+        if (!attackStateEntered) yield return new WaitForSeconds(0.5f);
+
+        // restore navmesh control
+        agent.updatePosition = true;
+        agent.updateRotation = true;
+        agent.isStopped = false;
+
+        attackCoroutine = null;
+    }*/
+
+    public void OnAttackAnimationEnd()
+    {
+        
+        tahAtacando = false;
+        agent.updatePosition = true;
+        agent.updateRotation = true;
+        agent.isStopped = false;
     }
 
     private void OnDrawGizmosSelected()
@@ -257,7 +351,14 @@ public class EnemyAI : MonoBehaviour
     }
     
     public void die()
-    {
+    { 
         playerEngagement.StopTracking(this.transform);
+        spawner.NotifyZombieRemoved();
     }
+
+    void OnDestroy()
+    {
+        if (Application.isPlaying && spawner != null) die();
+    }
+
 }
