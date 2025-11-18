@@ -22,6 +22,8 @@ public class WeaponControllerJoyCon : MonoBehaviour
     public Transform playerBody;      // usado para construir target global
     public PlaneBehaviour cutter;
 
+    public VariavelGlobal variaveisGlobais;
+
     [Header("Rotation / tuning")]
     public float rotationSensitivity = 1f;
     [Range(0f, 0.99f)]
@@ -198,6 +200,7 @@ public class WeaponControllerJoyCon : MonoBehaviour
             {
                 //UnityEngine.Debug.Log("matou o veio");
                 other.gameObject.GetComponentInParent<EnemyAI>().die();
+                variaveisGlobais.SomaPontos(130);
             }
 
         }

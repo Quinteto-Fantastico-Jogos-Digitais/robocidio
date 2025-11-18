@@ -22,6 +22,8 @@ public class WeaponController : MonoBehaviour
     public Camera cam;                 // optional, defaults to Camera.main
     public PlaneBehaviour cutter;
 
+    public VariavelGlobal variaveisGlobais;
+
     [Header("Control")]
     [Tooltip("0 = left mouse, 1 = right mouse")]
     public int controlMouseButton = 1;
@@ -255,8 +257,8 @@ public class WeaponController : MonoBehaviour
 
                     // apply sensitivity + clamps
                     le *= rotationSensitivity;
-                    le.x = Mathf.Clamp(le.x, limitPitchMin, limitPitchMax);
-                    le.y = Mathf.Clamp(le.y, limitYawMin, limitYawMax);
+                    le.x = Mathf.Clamp(le.x, -180f, 180f);
+                    le.y = Mathf.Clamp(le.y, -180f, 180f);
                     le.z = Mathf.Clamp(le.z, -180f, 180f);
 
                     // find variant (±360 shifts) closest to previousLocal to avoid jumps
@@ -406,6 +408,15 @@ public class WeaponController : MonoBehaviour
 
         Debug.Log("Colidi com: " + other.gameObject.name);
         cutter.Cut();
+
+        //Se for inimigo chama a função de morrer
+        if (other.gameObject.GetComponentInParent<EnemyAI>() != null)
+        {
+            //UnityEngine.Debug.Log("matou o veio");
+            variaveisGlobais.SomaPontos(130);
+            other.gameObject.GetComponentInParent<EnemyAI>().die();
+        }
+
     }
 
     void OnDrawGizmosSelected()

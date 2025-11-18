@@ -8,6 +8,8 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private Transform currentTarget;
     private EngagementTracker targetEngagement;
     private EngagementTracker myEngagementTracker;
+    public Collider attackCollider;
+    public VariavelGlobal variaveisGlobais;
     
     private Transform playerTarget;
     private EngagementTracker playerEngagement;
@@ -29,8 +31,6 @@ public class EnemyAI : MonoBehaviour
     private static readonly int InRangeHash = Animator.StringToHash("inRange");
 
     private ZombieSpawner spawner;
-
-    private Coroutine attackCoroutine;
 
     public bool tahAtacando = false;
 
@@ -82,6 +82,14 @@ public class EnemyAI : MonoBehaviour
     {
         animator = transform.gameObject.GetComponent<Animator>();
         spawner = FindFirstObjectByType<ZombieSpawner>();
+
+        if (variaveisGlobais == null)
+        {
+            variaveisGlobais = FindFirstObjectByType<VariavelGlobal>();
+            if (variaveisGlobais == null)
+                Debug.LogWarning($"[EnemyAI] VariavelGlobal não encontrada para o inimigo '{name}'. Atribua via Inspector ou use Singleton.");
+        }
+
     }
 
     void Update()
@@ -339,6 +347,32 @@ public class EnemyAI : MonoBehaviour
         agent.updatePosition = true;
         agent.updateRotation = true;
         agent.isStopped = false;
+    }
+
+    public void StartCollisionAttack()
+    {
+        attackCollider.enabled = true;
+    }
+
+    public void EndCollisionAttack()
+    {
+        attackCollider.enabled = false;
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        if (attackCollider.enabled == true)
+        {
+            Debug.Log("Collidi com" + other.gameObject.name);
+
+            //Se for o player e tiver a vida então tira vida
+            if (other.gameObject.GetComponent<Health>() != null)
+            {
+                //UnityEngine.Debug.Log("matou o veio");
+                other.gameObject.GetComponent<Health>().TakeDamage(attackDamage);
+                variaveisGlobais.StartTomouDano();
+            }
+        }
     }
 
     private void OnDrawGizmosSelected()

@@ -29,6 +29,8 @@ public class ControladorHorda : MonoBehaviour
     private Light[] todasAsLuzes;
     private Renderer[] todasOsQuadros;
 
+    public VariavelGlobal variaveisGlobais;
+
     void Start()
     {
         spawner.OnHordeCompleted += OnHordeEnd;
@@ -41,36 +43,37 @@ public class ControladorHorda : MonoBehaviour
 
         //Joga a primeira horda para começar e depois vai para a magia
         //HORDA 1
-        ZombieSpawnInfo[] horde = new ZombieSpawnInfo[]
+        /*ZombieSpawnInfo[] horde = new ZombieSpawnInfo[]
         {
             new ZombieSpawnInfo { prefab = zombie, count = 10}
-        };
-        StartHorde(horde);
+        };*/
+
+        //espera 30 segundos para chamar
+        //StartHorde(horde);
+        Invoke(nameof(StartHorde), 1f);
     }
 
     void OnHordeEnd()
     {
-
-        Debug.Log("Acabou a horda?");
-
         if(spawner.currentZombies != 0)
         {
-            Debug.Log("Não");
             //se não acabou a hora ainda ele vai se invocar daqui a 1 segundo e verificar denovo
             Invoke(nameof(OnHordeEnd), 1f);
             return;
         }
 
-        Debug.Log("Siiiim");
-
         horda += 1;
-        //NewHorde();
-        //espera 10 segundos para chamar
-        Invoke(nameof(NewHorde), 10f);
+        //variaveisGlobais.SomaHorda();
+
+        //espera 30 segundos para chamar
+        Invoke(nameof(NewHorde), 15f);
     }
 
     void NewHorde()
     {
+
+        variaveisGlobais.SomaHorda();
+
         int total = horda * 5;  // total de zumbis da horda
 
         int qtd1 = 0;
@@ -216,15 +219,20 @@ public class ControladorHorda : MonoBehaviour
 
     }
 
+    //void StartHorde(ZombieSpawnInfo[] horde)
+    void StartHorde()
+    {
+        //Chama na primeira horda
+        ZombieSpawnInfo[] horde = new ZombieSpawnInfo[]
+        {
+            new ZombieSpawnInfo { prefab = zombie, count = 10}
+        };
+
+        spawner.StartHorde(horde);
+    }
+
     void StartHorde(ZombieSpawnInfo[] horde)
     {
-        /*ZombieSpawnInfo[] horde = new ZombieSpawnInfo[]
-        {
-            new ZombieSpawnInfo { prefab = zombie, count = 5 },
-            new ZombieSpawnInfo { prefab = zombieRapido, count = 3 },
-            new ZombieSpawnInfo { prefab = zombieRastejante, count = 1 }
-        };*/
-
         spawner.StartHorde(horde);
     }
 

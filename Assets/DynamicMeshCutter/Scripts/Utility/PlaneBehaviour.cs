@@ -162,11 +162,12 @@ namespace DynamicMeshCutter
         //depois de cortar aqui que cria o corpo morto
         {
             MeshCreation.TranslateCreatedObjects(info, cData.CreatedObjects, cData.CreatedTargets, Separation);
-            /*foreach (var go in cData.CreatedObjects)
+            foreach (var go in cData.CreatedObjects)
             {
                 if (go == null) continue;
-                foreach (Transform t in go.transform) t.gameObject.layer = LayerMask.NameToLayer("Corte");
-            }*/
+                //foreach (Transform t in go.transform) t.gameObject.layer = LayerMask.NameToLayer("Corte");
+                foreach (Transform t in go.transform) Destroy(go, 5f);
+            }
         }
 
         void DetachLimbs(GameObject targetRoot)

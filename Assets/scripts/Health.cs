@@ -7,7 +7,8 @@ public class Health : MonoBehaviour
     public float maxHealth = 100f;
     
     private float currentHealth; 
-    private RagdollControl ragdollControl;
+
+    public VariavelGlobal variaveisGlobais;
 
     public float CurrentHealth 
     {
@@ -17,17 +18,6 @@ public class Health : MonoBehaviour
     void Awake()
     {
         currentHealth = maxHealth;
-        ragdollControl = GetComponent<RagdollControl>(); 
-
-        if (ragdollControl == null)
-        {
-            ragdollControl = GetComponentInChildren<RagdollControl>();
-        }
-
-        if (ragdollControl == null)
-        {
-            Debug.LogWarning($"Health: O GameObject '{gameObject.name}' não encontrou um componente RagdollControl.");
-        }
     }
 
     public void TakeDamage(float damage)
@@ -54,12 +44,6 @@ public class Health : MonoBehaviour
     private void Die()
     {
         Debug.Log($"{gameObject.name} morreu!");
-
-        if (ragdollControl != null)
-        {
-            ragdollControl.SetRagdollState(true);
-        }
-
-        Destroy(gameObject, 5f); 
+        variaveisGlobais.CallGameOver();
     }
 }

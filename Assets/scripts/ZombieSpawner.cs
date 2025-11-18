@@ -17,6 +17,7 @@ public class ZombieSpawner : MonoBehaviour
     public int maxZombies = 10;
 
     public int currentZombies = 0;
+    
     Coroutine hordeCoroutine;
 
     // Callback para avisar quando a horda terminou
