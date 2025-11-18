@@ -27,8 +27,32 @@ namespace DynamicMeshCutter
 
             //UnityEngine.Debug.Log("cirr");
 
-            Collider[] hits = Physics.OverlapBox(transform.position, transform.lossyScale/2, transform.rotation, cutLayer);
-            DebugDrawBox(transform.position, transform.lossyScale/2, transform.rotation, Color.green);
+            //Vector3 size = box.bounds.extents;
+            BoxCollider box = this.GetComponent<BoxCollider>();
+            /*Vector3 worldCenter = box.bounds.center;   // centro no mundo
+            Vector3 worldHalfExtents = box.bounds.extents; // metade do tamanho no mundo
+
+            Collider[] hits = Physics.OverlapBox(worldCenter, worldHalfExtents, box.transform.rotation, cutLayer);*/
+
+            // --- CALCULO CORRETO ---
+            // 1) half extents em espaço mundial: metade do size local * lossyScale do transform do collider
+            Vector3 halfExtentsWorld = Vector3.Scale(box.size * 0.5f, box.transform.lossyScale);
+
+            // 2) centro em espaço mundial: transforma o center local do collider para mundo
+            Vector3 worldCenter = box.transform.TransformPoint(box.center);
+
+            // 3) orientação: usar a rotação do transform do collider (world rotation)
+            Quaternion orientation = box.transform.rotation;
+
+            // 4) chamada Physics.OverlapBox com os valores corretos
+            //Collider[] hits = Physics.OverlapBox(worldCenter, halfExtentsWorld, orientation, cutLayer);
+
+            //Collider[] hits = Physics.OverlapBox(transform.position, transform.lossyScale/2, transform.rotation, cutLayer);
+            //DebugDrawBox(transform.position, transform.lossyScale/2, transform.rotation, Color.green);
+            //Collider[] hits = Physics.OverlapBox(transform.position, size, transform.rotation, cutLayer);
+            Collider[] hits = Physics.OverlapBox(worldCenter, halfExtentsWorld, orientation, cutLayer);
+            DebugDrawBox(worldCenter, halfExtentsWorld, orientation, Color.green);
+            
             foreach (var h in hits)
             {
                 //var target = h.GetComponentInParent<MeshTarget>();
@@ -63,21 +87,22 @@ namespace DynamicMeshCutter
                 }
 
                 //Se for inimigo chama a função de morrer
-                if (h.GetComponentInParent<EnemyAI>() != null)
+                /*if (h.GetComponentInParent<EnemyAI>() != null)
                 {
                     //UnityEngine.Debug.Log("matou o veio");
                     h.GetComponentInParent<EnemyAI>().die();
-                }
+                }*/
 
                 //DetachLimbs(target.gameObject);
-                Cut(target, transform.position, transform.forward, null, OnCreated);
+                //Cut(target, transform.position, transform.forward, null, OnCreated);
+                Cut(target, worldCenter, box.transform.forward, null, OnCreated);
             }
         }
         
-        /*public void Cut(Collision col)
+        public void Cut(Collider Other)
         {
 
-            DebugDrawBox(transform.position, transform.lossyScale, transform.rotation, Color.green);
+            /*DebugDrawBox(transform.position, transform.lossyScale, transform.rotation, Color.green);
 
             var h = col.gameObject;
             //var target = h.GetComponentInParent<MeshTarget>();
@@ -111,8 +136,27 @@ namespace DynamicMeshCutter
 
             //UnityEngine.Debug.Log(target.name);
             //DetachLimbs(target.gameObject);
+            Cut(target, transform.position, transform.forward, null, OnCreated);*/
+            var h = Other.gameObject;
+            MeshTarget target = h.GetComponent<MeshTarget>();
+
+            if (target == null)
+            {
+                UnityEngine.Debug.Log($"No MeshTarget found for collider {h.name}");
+                return;
+            }
+
+            //Se for inimigo chama a função de morrer
+            if (h.GetComponentInParent<EnemyAI>() != null)
+            {
+                //UnityEngine.Debug.Log("matou o veio");
+                h.GetComponentInParent<EnemyAI>().die();
+            }
+
+            DebugDrawBox(transform.position, transform.lossyScale, transform.rotation, Color.green);
+            //DetachLimbs(target.gameObject);
             Cut(target, transform.position, transform.forward, null, OnCreated);
-        }*/
+        }
 
         void OnCreated(Info info, MeshCreationData cData)
         //depois de cortar aqui que cria o corpo morto
@@ -174,21 +218,28 @@ namespace DynamicMeshCutter
                     up * ((i & 2) == 0 ? -halfExtents.y : halfExtents.y) +
                     forward * ((i & 4) == 0 ? -halfExtents.z : halfExtents.z);
             }
+            /*for (int i = 0; i < 8; i++)
+            {
+                corners[i] = center +
+                    right * ((i & 1) == 0 ? -1 : 1) +
+                    up * ((i & 2) == 0 ? -1 : 1) +
+                    forward * ((i & 4) == 0 ? -1 : 1);
+            }*/
             
-            UnityEngine.Debug.DrawLine(corners[0], corners[1], color, 5.0f);
-            UnityEngine.Debug.DrawLine(corners[1], corners[3], color, 5.0f);
-            UnityEngine.Debug.DrawLine(corners[3], corners[2], color, 5.0f);
-            UnityEngine.Debug.DrawLine(corners[2], corners[0], color, 5.0f);
+            UnityEngine.Debug.DrawLine(corners[0], corners[1], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[1], corners[3], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[3], corners[2], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[2], corners[0], color, 30.0f);
 
-            UnityEngine.Debug.DrawLine(corners[4], corners[5], color);
-            UnityEngine.Debug.DrawLine(corners[5], corners[7], color);
-            UnityEngine.Debug.DrawLine(corners[7], corners[6], color);
-            UnityEngine.Debug.DrawLine(corners[6], corners[4], color);
+            UnityEngine.Debug.DrawLine(corners[4], corners[5], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[5], corners[7], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[7], corners[6], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[6], corners[4], color, 30.0f);
 
-            UnityEngine.Debug.DrawLine(corners[0], corners[4], color);
-            UnityEngine.Debug.DrawLine(corners[1], corners[5], color);
-            UnityEngine.Debug.DrawLine(corners[2], corners[6], color);
-            UnityEngine.Debug.DrawLine(corners[3], corners[7], color);
+            UnityEngine.Debug.DrawLine(corners[0], corners[4], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[1], corners[5], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[2], corners[6], color, 30.0f);
+            UnityEngine.Debug.DrawLine(corners[3], corners[7], color, 30.0f);
         }
 
     }

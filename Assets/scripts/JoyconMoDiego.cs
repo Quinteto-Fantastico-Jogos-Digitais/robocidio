@@ -183,10 +183,10 @@ public class JoyconSwordController : MonoBehaviour
 
             float absoluteSwing = Mathf.Abs(yawDelta) + Mathf.Abs(pitchDelta);
             
-            if (absoluteSwing >= mouseSwingThreshold)
-            {
+            //if (absoluteSwing >= mouseSwingThreshold)
+            //{
                 cutter.Cut();
-            }
+            //}
 
             // Trava na rotação atual
             currentTargetRotation = swordRb != null ? swordRb.rotation : transform.rotation;

@@ -155,7 +155,7 @@ public class ControladorHorda : MonoBehaviour
                 qtd3 = 50;
                 break;
             
-            case 2: //Insane
+            case 60: //Insane
                 //vou mudar aleatoriamente a cor
                 ChangeClownPhotos(insanidade);
                 

@@ -36,7 +36,7 @@ public class EnemyAI : MonoBehaviour
 
     void Awake()
     {
-        NavMeshHit hit;
+        //NavMeshHit hit;
 
         if (!TryGetComponent(out agent))
         {
@@ -70,12 +70,12 @@ public class EnemyAI : MonoBehaviour
 
         agent.stoppingDistance = attackRange;
 
-        if (!NavMesh.SamplePosition(transform.position, out hit, 1.0f, NavMesh.AllAreas))
+        /*if (!NavMesh.SamplePosition(transform.position, out hit, 1.0f, NavMesh.AllAreas))
         {
             Debug.LogWarning(
                 $"🚨 O GameObject '{gameObject.name}' não consegue encontrar o NavMesh. " +
                 "Certifique-se de que o chão da cena foi 'cozido' (Baked) corretamente para o NavMesh.");
-        }
+        }*/
     }
 
     void Start()
