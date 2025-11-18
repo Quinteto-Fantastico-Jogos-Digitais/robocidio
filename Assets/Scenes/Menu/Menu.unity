@@ -250,7 +250,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 131361133}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 189271306}
+        m_TargetAssemblyTypeName: MainMenuOptions, Assembly-CSharp
+        m_MethodName: SairDoJogo
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &131361133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,6 +301,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 131361130}
   m_CullTransparentMesh: 1
+--- !u!1 &189271305
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 189271307}
+  - component: {fileID: 189271306}
+  m_Layer: 0
+  m_Name: MenuController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &189271306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 189271305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd03725068d83d84dbc5f36c022621cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainMenuOptions
+  painelMenuInicial: {fileID: 1417093266}
+  painelOpcoes: {fileID: 2043624168}
+--- !u!4 &189271307
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 189271305}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 11.61731, y: 0, z: 17.32139}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &301569408
 GameObject:
   m_ObjectHideFlags: 0
@@ -658,7 +716,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 520689659}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 189271306}
+        m_TargetAssemblyTypeName: MainMenuOptions, Assembly-CSharp
+        m_MethodName: Jogar
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: MapaPrincipal
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &520689659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1648,7 +1718,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 985363900}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 189271306}
+        m_TargetAssemblyTypeName: MainMenuOptions, Assembly-CSharp
+        m_MethodName: AbrirOpcoes
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &985363900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2715,7 +2797,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1859755921}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 189271306}
+        m_TargetAssemblyTypeName: MainMenuOptions, Assembly-CSharp
+        m_MethodName: FecharOpcoes
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1859755921
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2806,8 +2900,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22980972219c1af47be514990f44eeb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpcoesControle
-  toggleTecladoMouse: {fileID: 825156836}
-  toggleJoycon: {fileID: 1657824766}
 --- !u!1 &2116349078
 GameObject:
   m_ObjectHideFlags: 0
@@ -2952,3 +3044,4 @@ SceneRoots:
   - {fileID: 1110041363}
   - {fileID: 960644921}
   - {fileID: 648288841}
+  - {fileID: 189271307}

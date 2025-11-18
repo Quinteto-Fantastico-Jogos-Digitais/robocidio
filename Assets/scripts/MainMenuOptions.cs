@@ -1,28 +1,42 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MainMenuOptions
+public class MainMenuOptions : MonoBehaviour
 {
-
+    
     [SerializeField] private GameObject painelMenuInicial;
     [SerializeField] private GameObject painelOpcoes;
-    
-    public void Start() {
 
+    void Start()
+    {
+        if (painelMenuInicial != null) painelMenuInicial.SetActive(true);
+        if (painelOpcoes != null) painelOpcoes.SetActive(false);
     }
 
-    public void AbrirOpcoes() {
-        painelMenuInicial.SetActive(false);
-        painelOpcoes.SetActive(true);
+    public void AbrirOpcoes()
+    {
+        if (painelMenuInicial != null) painelMenuInicial.SetActive(false);
+        if (painelOpcoes != null) painelOpcoes.SetActive(true);
     }
 
-    public void FecharOpcoes() {
-        painelOpcoes.SetActive(false);
-        painelMenuInicial.SetActive(true);
+    public void FecharOpcoes()
+    {
+        if (painelOpcoes != null) painelOpcoes.SetActive(false);
+        if (painelMenuInicial != null) painelMenuInicial.SetActive(true);
     }
 
-    public void SairDoJogo() {
-        Debug.Log("Sair do jogo");
+    public void SairDoJogo()
+    {
+        Debug.Log("Saindo do Jogo...");
         Application.Quit();
+
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+    }
+
+    public void Jogar(string nomeDaCenaPrincipal)
+    {
+        SceneManager.LoadScene(nomeDaCenaPrincipal);
     }
 }
