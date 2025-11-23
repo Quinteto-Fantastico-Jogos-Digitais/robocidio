@@ -60696,6 +60696,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1036248724}
     - target: {fileID: 1331151083770060104, guid: 6b0c99035c608b3479c042b89e0c6db7, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1331151083770060104, guid: 6b0c99035c608b3479c042b89e0c6db7, type: 3}
       propertyPath: playerBody
       value: 
       objectReference: {fileID: 374585208}
@@ -60715,6 +60719,10 @@ PrefabInstance:
       propertyPath: cam
       value: 
       objectReference: {fileID: 1036248724}
+    - target: {fileID: 4249405610714600612, guid: 6b0c99035c608b3479c042b89e0c6db7, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4249405610714600612, guid: 6b0c99035c608b3479c042b89e0c6db7, type: 3}
       propertyPath: playerBody
       value: 
@@ -152074,6 +152082,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 513751849038120713, guid: db225bff13ce3fa40b3402584293f728, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1586802019789914698, guid: db225bff13ce3fa40b3402584293f728, type: 3}
       propertyPath: m_LocalPosition.y
       value: 1.8
@@ -152089,6 +152101,10 @@ PrefabInstance:
     - target: {fileID: 1641009424315001635, guid: db225bff13ce3fa40b3402584293f728, type: 3}
       propertyPath: m_Center.y
       value: 0.44
+      objectReference: {fileID: 0}
+    - target: {fileID: 2318691250473113213, guid: db225bff13ce3fa40b3402584293f728, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2318691250473113213, guid: db225bff13ce3fa40b3402584293f728, type: 3}
       propertyPath: moveSpeed
@@ -351270,6 +351286,10 @@ PrefabInstance:
     - target: {fileID: 4764503961983983975, guid: af593e327ad9b1142882e9c69c3be131, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5765710658710962525, guid: af593e327ad9b1142882e9c69c3be131, type: 3}
+      propertyPath: horda
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5765710658710962525, guid: af593e327ad9b1142882e9c69c3be131, type: 3}
       propertyPath: luzes

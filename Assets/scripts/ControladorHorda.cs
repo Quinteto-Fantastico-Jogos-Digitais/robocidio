@@ -103,7 +103,7 @@ public class ControladorHorda : MonoBehaviour
                 qtd3 = 30;
                 break;
 
-            case 15: //Apagaremos as luzes (muda as fotos do palhaço tbm mas esse ta por outra hora)
+            case 2: //Apagaremos as luzes (muda as fotos do palhaço tbm mas esse ta por outra hora)
                 ChangeLightColor(Color.black);
                 ChangeClownPhotos(negacao);
 
