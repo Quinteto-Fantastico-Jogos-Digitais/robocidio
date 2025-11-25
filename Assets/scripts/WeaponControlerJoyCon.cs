@@ -22,6 +22,9 @@ public class WeaponControllerJoyCon : MonoBehaviour
     public Transform playerBody;      // usado para construir target global
     public PlaneBehaviour cutter;
 
+    public GlorpTrigger glorp;
+    public ReloadDemo reload;
+
     public VariavelGlobal variaveisGlobais;
 
     [Header("Rotation / tuning")]
@@ -85,6 +88,18 @@ public class WeaponControllerJoyCon : MonoBehaviour
             calibOffset = desired * Quaternion.Inverse(raw);
             Debug.Log("[Calib] desired (world cam): " + desired.eulerAngles);
 
+        }
+
+        if (j.GetButtonDown(Joycon.Button.DPAD_RIGHT)) {
+            glorp.SwitchClicou = true;
+        }
+
+        if (j.GetButtonUp(Joycon.Button.DPAD_RIGHT)) {
+            glorp.SwitchClicou = false;
+        }
+
+        if (j.GetButtonUp(Joycon.Button.DPAD_UP)) {
+            reload.reload();
         }
 
         // Prefer Joycon data only. If não houver Joycon, mantém última quat conhecida (no últimoJoyQuat).

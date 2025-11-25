@@ -3,12 +3,19 @@ using TMPro;
 
 public class VariavelGlobal : MonoBehaviour
 {
-
     public long pontos = 0;
     private float startTime;
     public float elapsed;
     public long killCount = 0;
-    public int horda = 1;
+    private int horda = 1;
+
+    //perks
+    public float velocidade = 10f;
+    public bool QuickRevive = false;
+    public bool Explosion = false;
+    public int MuleQuick = 1; //quantidade de espadas
+    public int HealthUpgrade = 0;
+    public int Luck = 0;
 
     public GameObject GUI;
 
@@ -20,8 +27,21 @@ public class VariavelGlobal : MonoBehaviour
     private TMP_Text hordaContagem;
     private TMP_Text tempoContagem;
     private GameObject GameOver;
+    private TMP_Text gameOverAux;
     private GameObject Blood;
+    private TextMeshProUGUI Aux;
 
+    public bool glorpCooldown = false;
+
+    public GameObject LOJA;
+    private LojaOn lolja;
+    private TMP_Text pontosLoja;
+    private TMP_Text vidaLoja;
+    private TMP_Text upgradeVidaTexto;
+    private TMP_Text upgradeVidaCusto;
+    private TMP_Text apostaQuantidade;
+
+    public int upgradeVidaCustoNumerico = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -32,7 +52,18 @@ public class VariavelGlobal : MonoBehaviour
         hordaContagem = GUI.transform.GetChild(indiceHorda).GetChild(0).GetComponent<TMP_Text>();
         tempoContagem = GUI.transform.GetChild(indiceTempo).GetChild(0).GetComponent<TMP_Text>();
         GameOver = GUI.transform.GetChild(3).gameObject;
+        gameOverAux = GUI.transform.GetChild(3).GetChild(1).GetComponent<TMP_Text>();
         Blood = GUI.transform.GetChild(4).gameObject;
+        Aux = GUI.transform.GetChild(5).gameObject.GetComponent<TextMeshProUGUI>();
+
+        lolja = LOJA.GetComponent<LojaOn>();
+        pontosLoja = LOJA.transform.GetChild(0).GetChild(0).GetChild(3).GetChild(0).GetComponent<TMP_Text>();
+        vidaLoja = LOJA.transform.GetChild(0).GetChild(0).GetChild(2).GetChild(0).GetComponent<TMP_Text>();
+        upgradeVidaTexto = LOJA.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponent<TMP_Text>();
+        upgradeVidaCusto = LOJA.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(2).GetComponent<TMP_Text>();
+        upgradeVidaCustoNumerico = int.Parse(upgradeVidaCusto.text);
+
+        apostaQuantidade = LOJA.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(1).GetChild(2).GetChild(0).GetComponent<TMP_Text>();
 
         pontosContagem.SetText("{0}", 0);
         hordaContagem.SetText("{0}", 1f);
@@ -62,26 +93,38 @@ public class VariavelGlobal : MonoBehaviour
         hordaContagem.SetText("{0}", horda);
     }
 
-    public void SomaPontos(int qtd)
+    public void SomaPontos(long qtd)
     {
         pontos += qtd;
-        AtualizaTexto(indicePontos, pontos);
+        pontosContagem.SetText("{0}", pontos);
+        pontosLoja.SetText("{0}", pontos);
     }
 
-    public void AtualizaTexto(int indice, int qtd)
+    public void SubtraiPontos(long qtd)
     {
-        Debug.Log("cheguei pra somar int");
-        if (indice == indiceHorda)
-        {
-            hordaContagem.SetText("{0}", qtd);
-        } 
+        pontos -= qtd;
+        pontosContagem.SetText("{0}", pontos);
+        pontosLoja.SetText("{0}", pontos);
     }
 
-    public void AtualizaTexto(int indice, long qtd)
+    public void setVida(float qtd)
     {
-        if (indice == 0) {
-            pontosContagem.SetText("{0}", qtd);
-        }
+        vidaLoja.SetText("{0}", qtd);
+    }
+
+    public void setUpgradeText(string text)
+    {
+        upgradeVidaTexto.SetText(text);
+    }
+
+    public void setUpgradeCusto(string text)
+    {
+        upgradeVidaCusto.SetText(text);
+    }
+
+    public void setApostaQuantidade(long pontos)
+    {
+        apostaQuantidade.SetText("{0}", pontos);
     }
 
     public void StartTomouDano()
@@ -95,9 +138,37 @@ public class VariavelGlobal : MonoBehaviour
         Blood.SetActive(false);
     }
 
+    public void setTextoAux(string texto)
+    {
+        Aux.SetText(texto);
+    }
+
+    public void abreLoja()
+    {
+        LOJA.SetActive(true);
+        lolja.lojaOn();
+    }
+
+    public void fechaLoja()
+    {
+        LOJA.SetActive(false);
+    }
+
     public void CallGameOver()
     {
         GameOver.SetActive(true);
+
+        int tipoControle = PlayerPrefs.GetInt("tipoControle", 0);
+
+        if (tipoControle == 0)
+        {
+            gameOverAux.SetText("--- Pressione a tecla <color=#FFFF00>R</color> para recomecar ---");
+        }
+        else
+        {
+            gameOverAux.SetText("--- Pressione a tecla <color=#FFFF00>X</color> para recomecar ---");
+        }
+
         Time.timeScale = 0f;   // pausa TUDO
         Time.fixedDeltaTime = 0f; // pausa física corretamente
     }

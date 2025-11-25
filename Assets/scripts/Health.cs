@@ -40,6 +40,15 @@ public class Health : MonoBehaviour
         
         Debug.Log($"{gameObject.name} foi curado em {healAmount}. Vida atual: {currentHealth}");
     }
+
+    public void Upgrade()
+    {
+        maxHealth += 50;
+        currentHealth = maxHealth;
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        
+        Debug.Log($"{gameObject.name} aumentou a vida em 50. Vida atual: {currentHealth}");
+    }
     
     private void Die()
     {

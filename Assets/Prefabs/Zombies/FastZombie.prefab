@@ -402,17 +402,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab92800c08478645bc97a691a715a38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
+  agent: {fileID: 0}
   currentTarget: {fileID: 0}
+  targetEngagement: {fileID: 0}
+  myEngagementTracker: {fileID: 0}
   attackCollider: {fileID: 5481203943229456389}
   variaveisGlobais: {fileID: 0}
+  playerTarget: {fileID: 0}
+  playerEngagement: {fileID: 0}
   detectionRadius: 1500
   targetLayerMask:
     serializedVersion: 2
     m_Bits: 128
-  attackDamage: 5
+  attackDamage: 30
   attackRange: 3
   attackRate: 0.1
+  nextAttackTime: 0
+  animator: {fileID: 0}
+  spawner: {fileID: 0}
   tahAtacando: 0
+  maxAttackStallTime: 3.5
 --- !u!114 &3541035832657570580
 MonoBehaviour:
   m_ObjectHideFlags: 0

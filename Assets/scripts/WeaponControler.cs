@@ -64,6 +64,7 @@ public class WeaponController : MonoBehaviour
     // small capture-edge tracking
     private bool prevRightCapture = false;
     private bool prevLeftCapture = false;
+    private bool anchorAtTip = false;
 
     // internals
     Rigidbody rb;
@@ -198,6 +199,20 @@ public class WeaponController : MonoBehaviour
         bool wasCapturingLastFrame = (controlMouseButton == 1) ? prevRightCapture : prevLeftCapture; 
         // (we'll maintain prevRightCapture/prevLeftCapture as small state flags)
 
+        /*if (capturingThis && !wasCapturingLastFrame)
+        {
+            // sync simulatedQuat with current visual rotation to avoid discontinuity
+            if (handlePivot != null)
+                simulatedQuat = handlePivot.rotation;
+            else
+                simulatedQuat = transform.rotation;
+
+            // update previousLocal so candidate selection won't jump
+            if (playerBody != null)
+                previousLocal = Quaternion.Inverse(playerBody.rotation) * simulatedQuat;
+            else
+                previousLocal = simulatedQuat;
+        }*/
         if (capturingThis && !wasCapturingLastFrame)
         {
             // sync simulatedQuat with current visual rotation to avoid discontinuity
@@ -211,6 +226,24 @@ public class WeaponController : MonoBehaviour
                 previousLocal = Quaternion.Inverse(playerBody.rotation) * simulatedQuat;
             else
                 previousLocal = simulatedQuat;
+
+            // --- NOVO: alinhar o mouse virtual com a direção atual do handlePivot
+            // para evitar salto de rotação no momento em que o jogador começa a capturar
+            if (cam != null && handlePivot != null)
+            {
+                // projeta um ponto à frente do pivot na distância mouseFollowerDistance
+                Vector3 forwardPoint = handlePivot.position + handlePivot.forward * mouseFollowerDistance;
+                Vector3 fpScreen = cam.WorldToScreenPoint(forwardPoint);
+
+                sharedVirtualMousePos = new Vector2(
+                    Mathf.Clamp(fpScreen.x, screenMargin.x, Screen.width - screenMargin.x),
+                    Mathf.Clamp(fpScreen.y, screenMargin.y, Screen.height - screenMargin.y)
+                );
+                virtualMousePos = sharedVirtualMousePos;
+
+                // opcional: se você usa anchorAtTip, também pode manter anchorTipDepth aqui:
+                // anchorTipDepth = fpScreen.z;
+            }
         }
 
         // save capture state for next frame
@@ -237,7 +270,9 @@ public class WeaponController : MonoBehaviour
                 Vector3 screenPoint = new Vector3(mpos.x, mpos.y, mouseFollowerDistance);
                 Vector3 worldTarget = cam.ScreenToWorldPoint(screenPoint);
 
+                //CHANGE
                 Vector3 basePos = handlePivot.position; // rotate around pivot
+                //Vector3 basePos = (anchorAtTip && tip != null) ? tip.position : (handlePivot != null ? handlePivot.position : transform.position);
                 Vector3 desiredDir = worldTarget - basePos;
 
                 if (desiredDir.sqrMagnitude > 0.000001f)
@@ -340,22 +375,26 @@ public class WeaponController : MonoBehaviour
                 computedWorld = playerBody.rotation * localZero;
             else
                 computedWorld = localZero;
+
+            //NOVO
+            anchorAtTip = false;
         }
 
         // cache position & rotation for FixedUpdate
-        _desiredPosition = (handTransform != null) ? (handTransform.position + handTransform.TransformVector(followPositionOffset)) : transform.position;
+        //_desiredPosition = (handTransform != null) ? (handTransform.position + handTransform.TransformVector(followPositionOffset)) : transform.position;
+        _desiredPosition = (handTransform != null) ? handTransform.TransformPoint(followPositionOffset) : transform.position;
         _targetWorldRotation = computedWorld;
-    }
 
-    void FixedUpdate()
-    {
-        // position: move the root to follow hand (kinematic style)
+        //CHANGE: Mover a espada com o corpo
+        /*if (transform.parent != null)
+            transform.position = transform.parent.position;
+        else
+            transform.position = transform.position;*/ // sem alteração
         if (positionSmoothing <= 0f || firstFrame)
             transform.position = _desiredPosition;
         else
+            //transform.position = transform.parent.position;
             transform.position = Vector3.Lerp(transform.position, _desiredPosition, 1f - positionSmoothing);
-
-        // rotation: apply rotation to handlePivot only (so handle remains fixed at hand)
         if (handlePivot != null)
         {
             if (rotationSmoothing <= 0f || firstFrame)
@@ -370,6 +409,32 @@ public class WeaponController : MonoBehaviour
             else
                 transform.rotation = Quaternion.Slerp(transform.rotation, _targetWorldRotation, 1f - rotationSmoothing);
         }
+    }
+
+    void FixedUpdate()
+    {
+        // position: move the root to follow hand (kinematic style)
+        //CHANGE: MUDEI PRO UPDATE
+        /*if (positionSmoothing <= 0f || firstFrame)
+            transform.position = _desiredPosition;
+        else
+            transform.position = Vector3.Lerp(transform.position, _desiredPosition, 1f - positionSmoothing);*/
+
+        // rotation: apply rotation to handlePivot only (so handle remains fixed at hand)
+        /*if (handlePivot != null)
+        {
+            if (rotationSmoothing <= 0f || firstFrame)
+                handlePivot.rotation = _targetWorldRotation;
+            else
+                handlePivot.rotation = Quaternion.Slerp(handlePivot.rotation, _targetWorldRotation, 1f - rotationSmoothing);
+        }
+        else
+        {
+            if (rotationSmoothing <= 0f || firstFrame)
+                transform.rotation = _targetWorldRotation;
+            else
+                transform.rotation = Quaternion.Slerp(transform.rotation, _targetWorldRotation, 1f - rotationSmoothing);
+        }*/
 
         if (firstFrame) firstFrame = false;
     }
@@ -431,6 +496,22 @@ public class WeaponController : MonoBehaviour
             Gizmos.color = Color.yellow;
             Gizmos.DrawSphere(wt, 0.04f);
             Gizmos.DrawLine(_desiredPosition, wt);
+        }
+
+        if (handTransform != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(handTransform.position, handTransform.position + handTransform.forward * 1f);
+            Gizmos.DrawSphere(handTransform.TransformPoint(followPositionOffset), 0.06f);
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawLine(handTransform.position, _desiredPosition);
+            Gizmos.DrawSphere(_desiredPosition, 0.04f);
+        }
+
+        if (playerBody != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(playerBody.position, playerBody.position + playerBody.forward * 1f);
         }
     }
 }

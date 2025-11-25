@@ -14,7 +14,9 @@ public class MainCharacterController : MonoBehaviour
     public Transform cameraTransform; // child camera; fallback Camera.main
 
     [Header("Movement")]
-    public float moveSpeed = 4f;            // unidades/segundo
+    public VariavelGlobal variaveisGlobais;
+    //public float moveSpeed = 4f;            // unidades/segundo
+    public float moveSpeed = 10f;            // unidades/segundo
     [Range(0f, 0.5f)] public float moveSmoothTime = 0.08f;
 
     [Header("Mouse Look")]
@@ -155,6 +157,7 @@ public class MainCharacterController : MonoBehaviour
         Vector3 forward = yawRot * Vector3.forward;
         Vector3 right = yawRot * Vector3.right;
 
+        moveSpeed = variaveisGlobais.velocidade;
         Vector3 desiredVelocity = (forward * hy + right * hx) * moveSpeed;
 
         // smooth movement velocity (keeps currentVelocity used to step in LateUpdate)

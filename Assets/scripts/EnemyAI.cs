@@ -4,15 +4,15 @@ using System.Collections;
 
 public class EnemyAI : MonoBehaviour
 {
-    private NavMeshAgent agent;
-    [SerializeField] private Transform currentTarget;
-    private EngagementTracker targetEngagement;
-    private EngagementTracker myEngagementTracker;
+    public NavMeshAgent agent;
+    [SerializeField] public Transform currentTarget;
+    public EngagementTracker targetEngagement;
+    public EngagementTracker myEngagementTracker;
     public Collider attackCollider;
     public VariavelGlobal variaveisGlobais;
     
-    private Transform playerTarget;
-    private EngagementTracker playerEngagement;
+    public Transform playerTarget;
+    public EngagementTracker playerEngagement;
     
     [Header("Detecção e Alvos")]
     public float detectionRadius = 15f;
@@ -22,17 +22,20 @@ public class EnemyAI : MonoBehaviour
     public float attackDamage = 10f;
     public float attackRange = 2f;
     public float attackRate = 1.5f;
-    private float nextAttackTime = 0f;
+    public float nextAttackTime = 0f;
 
-    private Animator animator;
-    private static readonly int SpeedHash = Animator.StringToHash("Speed");
-    private static readonly int AttackHash = Animator.StringToHash("Attack");
-    private static readonly int AttackIndexHash = Animator.StringToHash("AttackIndex");
-    private static readonly int InRangeHash = Animator.StringToHash("inRange");
+    public Animator animator;
+    public static readonly int SpeedHash = Animator.StringToHash("Speed");
+    public static readonly int AttackHash = Animator.StringToHash("Attack");
+    public static readonly int AttackIndexHash = Animator.StringToHash("AttackIndex");
+    public static readonly int InRangeHash = Animator.StringToHash("inRange");
 
-    private ZombieSpawner spawner;
+    public ZombieSpawner spawner;
 
     public bool tahAtacando = false;
+
+    private Coroutine attackWatchdogCoroutine;
+    public float maxAttackStallTime = 3.5f; // watchdog: tempo máximo permitido em tahAtacando
 
     void Awake()
     {
@@ -89,7 +92,6 @@ public class EnemyAI : MonoBehaviour
             if (variaveisGlobais == null)
                 Debug.LogWarning($"[EnemyAI] VariavelGlobal não encontrada para o inimigo '{name}'. Atribua via Inspector ou use Singleton.");
         }
-
     }
 
     void Update()
@@ -110,7 +112,6 @@ public class EnemyAI : MonoBehaviour
                 animator.SetBool(InRangeHash, true);
                 if(Time.time >= nextAttackTime)
                 {
-                    //Debug.Log("to em ti cuzão");
                     AttackTarget();
                     nextAttackTime = Time.time + attackRate;
                 }
@@ -229,18 +230,6 @@ public class EnemyAI : MonoBehaviour
         }
     }
     
-    /*private bool IsTargetInSphere(Transform targetTransform, Collider[] targets)
-    {
-        foreach (Collider collider in targets)
-        {
-            if (collider.transform == targetTransform)
-            {
-                return true;
-            }
-        }
-        return false;
-    }*/
-    
     void AttackTarget()
     {
         if (currentTarget == null) return;
@@ -249,7 +238,7 @@ public class EnemyAI : MonoBehaviour
         //freeze navmesh movement/rotation e zera velocidade
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
-        animator.SetFloat(SpeedHash, 0);
+        animator.SetFloat(SpeedHash, 0f);
 
         agent.updatePosition = false;
         agent.updateRotation = false;
@@ -265,88 +254,26 @@ public class EnemyAI : MonoBehaviour
         int index = Random.Range(1, 3);
         animator.SetFloat(AttackIndexHash, index);
         animator.SetTrigger(AttackHash);
-        
-        //Health targetHealth = currentTarget.GetComponent<Health>();
-        
-        /*if (targetHealth != null)
-        {
-            targetHealth.TakeDamage(attackDamage); 
-        }*/
+
+        if (attackWatchdogCoroutine != null) StopCoroutine(attackWatchdogCoroutine);
+        attackWatchdogCoroutine = StartCoroutine(AttackWatchdog());
     }
-
-    /*void AttackTarget()
-    {
-        if (attackCoroutine != null) return; // evita double attack coroutines
-        attackCoroutine = StartCoroutine(AttackRoutine());
-    }
-
-    IEnumerator AttackRoutine()
-    {
-        if (currentTarget == null) { attackCoroutine = null; yield break; }
-
-        //freeze navmesh movement/rotation e zera velocidade
-        agent.isStopped = true;
-        agent.velocity = Vector3.zero;
-
-        agent.updatePosition = false;
-        agent.updateRotation = false;
-
-        //garantir que o zumbi olhe para o alvo (suave)
-        Vector3 lookPos = currentTarget.position;
-        lookPos.y = transform.position.y;
-        Quaternion wanted = Quaternion.LookRotation((lookPos - transform.position).normalized);
-        transform.rotation = Quaternion.Slerp(transform.rotation, wanted, 1f); 
-
-        // dispara animação
-        int index = Random.Range(0, 3);
-        animator.SetFloat(AttackIndexHash, index);
-        animator.SetTrigger(AttackHash);
-
-        // espera até que o estado de ataque termine — método robusto:
-        // assume que o estado de ataque tem tag "Attack" ou está em layer 0 com nome "Attack"
-        // você pode ajustar o nome do state ou usar Animation Events para detectar fim
-        float timeout = 2.5f; // fallback máximo em segundos (ajuste)
-        float timer = 0f;
-        bool attackStateEntered = false;
-
-        while (timer < timeout)
-        {
-            timer += Time.deltaTime;
-            var st = animator.GetCurrentAnimatorStateInfo(0);
-            // ajuste a condição para detectar seu state de attack
-            if (st.IsName("Attack") || st.IsTag("Attack"))
-            {
-                attackStateEntered = true;
-                // espera até sair do estado de attack
-                while (st.normalizedTime < 1f && timer < timeout)
-                {
-                    yield return null;
-                    timer += Time.deltaTime;
-                    st = animator.GetCurrentAnimatorStateInfo(0);
-                }
-                break;
-            }
-            yield return null;
-        }
-
-        // fallback: aguarda um tempo curto se a animação não foi detectada
-        if (!attackStateEntered) yield return new WaitForSeconds(0.5f);
-
-        // restore navmesh control
-        agent.updatePosition = true;
-        agent.updateRotation = true;
-        agent.isStopped = false;
-
-        attackCoroutine = null;
-    }*/
 
     public void OnAttackAnimationEnd()
     {
-        
         tahAtacando = false;
         agent.updatePosition = true;
         agent.updateRotation = true;
         agent.isStopped = false;
+
+        if (attackWatchdogCoroutine != null)
+        {
+            StopCoroutine(attackWatchdogCoroutine);
+            attackWatchdogCoroutine = null;
+        }
+
+        //animator.SetTrigger(AttackHash);
+        //animator.SetFloat(SpeedHash, 1);
     }
 
     public void StartCollisionAttack()
@@ -373,6 +300,23 @@ public class EnemyAI : MonoBehaviour
                 variaveisGlobais.StartTomouDano();
             }
         }
+    }
+
+    IEnumerator AttackWatchdog()
+    {
+        float started = Time.time;
+        while (tahAtacando && Time.time - started < maxAttackStallTime)
+        {
+            yield return null;
+        }
+
+        if (tahAtacando)
+        {
+            Debug.LogWarning($"[EnemyWatchdog:{name}] tahAtacando ficou true por {Time.time - started:F2}s -> forçando restauracao.");
+            // tenta restaurar
+            OnAttackAnimationEnd();
+        }
+        attackWatchdogCoroutine = null;
     }
 
     private void OnDrawGizmosSelected()

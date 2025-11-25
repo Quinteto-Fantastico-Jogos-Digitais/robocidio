@@ -20,7 +20,8 @@ public class MainCharacterControllerJoyCon : MonoBehaviour
     public Rigidbody characterRigidbody; // opcional: se presente, MovePosition será usado
 
     [Header("Movement")]
-    public float moveSpeed = 4f;
+    public VariavelGlobal variaveisGlobais;
+    public float moveSpeed = 10f;
     public float moveSmoothTime = 0.08f;
 
     [Header("Look (Joycon stick)")]
@@ -101,6 +102,9 @@ public class MainCharacterControllerJoyCon : MonoBehaviour
         // LOOK via stick (integra delta -> yaw/pitch)
         yawAngle = NormalizeAngle(yawAngle + camX * cameraYawSpeed * dt);
         pitch = Mathf.Clamp(pitch - camY * cameraPitchSpeed * dt, minPitch, maxPitch);
+
+        //Movespeed Relacionado a variaveisGlobais
+        moveSpeed = variaveisGlobais.velocidade;
 
         // MOVIMENTO (player-relative)
         Vector3 desiredVelocity = (transform.forward * moveY + transform.right * moveX) * moveSpeed;

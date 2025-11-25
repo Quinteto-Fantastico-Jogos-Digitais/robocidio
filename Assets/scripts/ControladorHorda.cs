@@ -25,7 +25,7 @@ public class ControladorHorda : MonoBehaviour
     public Material aceitação;
     public Material insanidade;
 
-    public int horda = 1; //Aqui que a magia acontece
+    private int horda = 1; //Aqui que a magia acontece
     private Light[] todasAsLuzes;
     private Renderer[] todasOsQuadros;
 
@@ -50,7 +50,7 @@ public class ControladorHorda : MonoBehaviour
 
         //espera 30 segundos para chamar
         //StartHorde(horde);
-        Invoke(nameof(StartHorde), 1f);
+        Invoke(nameof(StartHorde), 10f);
     }
 
     void OnHordeEnd()
@@ -71,8 +71,8 @@ public class ControladorHorda : MonoBehaviour
 
     void NewHorde()
     {
-
         variaveisGlobais.SomaHorda();
+        variaveisGlobais.glorpCooldown = true;
 
         int total = horda * 5;  // total de zumbis da horda
 
@@ -103,7 +103,7 @@ public class ControladorHorda : MonoBehaviour
                 qtd3 = 30;
                 break;
 
-            case 2: //Apagaremos as luzes (muda as fotos do palhaço tbm mas esse ta por outra hora)
+            case 15: //Apagaremos as luzes (muda as fotos do palhaço tbm mas esse ta por outra hora)
                 ChangeLightColor(Color.black);
                 ChangeClownPhotos(negacao);
 

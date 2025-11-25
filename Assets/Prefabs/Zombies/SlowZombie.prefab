@@ -444,17 +444,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab92800c08478645bc97a691a715a38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
+  agent: {fileID: 0}
   currentTarget: {fileID: 0}
+  targetEngagement: {fileID: 0}
+  myEngagementTracker: {fileID: 0}
   attackCollider: {fileID: 140727981203519284}
   variaveisGlobais: {fileID: 0}
+  playerTarget: {fileID: 0}
+  playerEngagement: {fileID: 0}
   detectionRadius: 1500
   targetLayerMask:
     serializedVersion: 2
     m_Bits: 128
-  attackDamage: 10
+  attackDamage: 50
   attackRange: 3
   attackRate: 0.5
+  nextAttackTime: 0
+  animator: {fileID: 0}
+  spawner: {fileID: 0}
   tahAtacando: 0
+  maxAttackStallTime: 3.5
 --- !u!114 &939670063044155720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1297,7 +1306,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DynamicMeshCutter.MeshTarget
   GameobjectRoot: {fileID: 4522200093958962032}
-  OverrideFaceMaterial: {fileID: 0}
+  OverrideFaceMaterial: {fileID: 2100000, guid: bd1d9734fb0659840b4700f1feeda577, type: 2}
   SeparateMeshes: 1
   ApplyTranslation: 1
   DefaultBehaviour: 0000000000000000
