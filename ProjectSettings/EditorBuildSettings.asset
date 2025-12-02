@@ -11,6 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MapaPrincipal.unity
     guid: 07cc43cdc34252449bfc5dee1d6391a4
+  - enabled: 1
+    path: Assets/Scenes/Tutorial.unity
+    guid: 0f70ad7234c917e4fa5fcbbe7c5e53c8
+  - enabled: 0
+    path: Assets/Scenes/FPSTESTE.unity
+    guid: 099207ec6a282404b80915cc598c809f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

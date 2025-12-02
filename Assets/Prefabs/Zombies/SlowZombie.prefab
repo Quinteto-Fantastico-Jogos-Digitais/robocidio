@@ -338,7 +338,7 @@ GameObject:
   - component: {fileID: 939670063044155720}
   m_Layer: 9
   m_Name: SlowZombie
-  m_TagString: Untagged
+  m_TagString: Zombie
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -404,7 +404,7 @@ NavMeshAgent:
   m_Height: 0.03
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
+  m_ObstacleAvoidanceType: 1
 --- !u!54 &2914558055251023486
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1169,7 +1169,7 @@ GameObject:
   - component: {fileID: 2923387811943050450}
   m_Layer: 9
   m_Name: Sphere.004
-  m_TagString: Untagged
+  m_TagString: Zombie
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1307,7 +1307,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DynamicMeshCutter.MeshTarget
   GameobjectRoot: {fileID: 4522200093958962032}
   OverrideFaceMaterial: {fileID: 2100000, guid: bd1d9734fb0659840b4700f1feeda577, type: 2}
-  SeparateMeshes: 1
+  SeparateMeshes: 0
   ApplyTranslation: 1
   DefaultBehaviour: 0000000000000000
   DynamicRagdoll: {fileID: 0}
@@ -1316,4 +1316,4 @@ MonoBehaviour:
   CreateRigidbody: 0101
   CreateMeshCollider: 0101
   Physics: 0200000002000000
-  Inherit: 0000
+  Inherit: 0101

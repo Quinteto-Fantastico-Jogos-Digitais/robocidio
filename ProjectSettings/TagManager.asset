@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Coin
   - Sword
+  - Zombie
   layers:
   - Default
   - TransparentFX

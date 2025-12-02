@@ -41,6 +41,10 @@ public class ControladorHorda : MonoBehaviour
         //Transform quadrosParent = quadros.transform;
         todasOsQuadros = quadros.transform.GetComponentsInChildren<Renderer>();
 
+        zombie.SetActive(true);
+        zombieRapido.SetActive(true);
+        zombieRastejante.SetActive(true);
+
         //Joga a primeira horda para começar e depois vai para a magia
         //HORDA 1
         /*ZombieSpawnInfo[] horde = new ZombieSpawnInfo[]

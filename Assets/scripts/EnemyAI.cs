@@ -37,6 +37,12 @@ public class EnemyAI : MonoBehaviour
     private Coroutine attackWatchdogCoroutine;
     public float maxAttackStallTime = 3.5f; // watchdog: tempo máximo permitido em tahAtacando
 
+    Vector3 lastDestination;
+    const float DESTINATION_EPSILON = 0.6f;
+    readonly float DESTINATION_EPSILON_SQR = DESTINATION_EPSILON * DESTINATION_EPSILON;
+    int updateInterval = 6;
+    int updateOffset;
+
     void Awake()
     {
         //NavMeshHit hit;
@@ -84,22 +90,26 @@ public class EnemyAI : MonoBehaviour
     void Start()
     {
         animator = transform.gameObject.GetComponent<Animator>();
-        spawner = FindFirstObjectByType<ZombieSpawner>();
+        //spawner = FindFirstObjectByType<ZombieSpawner>();
 
-        if (variaveisGlobais == null)
+        /*if (variaveisGlobais == null)
         {
             variaveisGlobais = FindFirstObjectByType<VariavelGlobal>();
             if (variaveisGlobais == null)
                 Debug.LogWarning($"[EnemyAI] VariavelGlobal não encontrada para o inimigo '{name}'. Atribua via Inspector ou use Singleton.");
-        }
+        }*/
+
+        updateOffset = Random.Range(0, updateInterval);
+        if (agent != null) lastDestination = agent.transform.position;
     }
 
-    void Update()
+    /*void Update()
     {
         FindNewTarget();
 
         if (currentTarget != null)
         {
+            if(agent.enabled == false) return;
             agent.SetDestination(currentTarget.position);
 
             //Avisa a velocidade do divo
@@ -129,6 +139,112 @@ public class EnemyAI : MonoBehaviour
             {
                 agent.ResetPath();
             }
+        }
+
+        if (currentTarget == null)
+        {
+            if (agent.hasPath) agent.ResetPath();
+            return;
+        }
+        if(agent.enabled == false) return;
+
+        Vector3 targetPos = currentTarget.position;
+        float distFromLastDest = Vector3.Distance(lastDestination, targetPos);
+
+        // Recalcula destino só se mudou o suficiente ou se agente sem path
+        if (!agent.hasPath || distFromLastDest > DESTINATION_EPSILON)
+        {
+            agent.SetDestination(targetPos);
+            lastDestination = targetPos;
+        }
+
+        //Avisa a velocidade do divo
+        float speed = agent.velocity.magnitude;
+        
+        float distanceToTarget = Vector3.Distance(transform.position, currentTarget.position);
+        
+        if (distanceToTarget <= attackRange + 0.1f)
+        {
+            animator.SetBool(InRangeHash, true);
+            if(Time.time >= nextAttackTime)
+            {
+                AttackTarget();
+                nextAttackTime = Time.time + attackRate;
+            }
+            
+        }
+        else
+        {
+            animator.SetBool(InRangeHash, false);
+            animator.SetFloat(SpeedHash, speed);
+        }
+
+    }*/
+
+    void Update()
+    {
+        FindNewTarget();
+
+        // se não tem target, limpa path e sai
+        if (currentTarget == null)
+        {
+            if (agent != null && agent.hasPath) agent.ResetPath();
+            return;
+        }
+
+        if (agent == null || !agent.enabled) return;
+
+        // não atualiza destino enquanto estiver atacando
+        if (!tahAtacando)
+        {
+            // espalha as atualizações entre frames para reduzir picos
+            if ((Time.frameCount + updateOffset) % updateInterval == 0)
+            {
+                TryUpdateDestination();
+            }
+        }
+
+        // calcula distância ao target (uma só vez)
+        float distanceToTargetSqr = (currentTarget.position - transform.position).sqrMagnitude;
+        float attackRangeSqr = (attackRange + 0.1f) * (attackRange + 0.1f);
+
+        // se está no alcance de ataque
+        if (distanceToTargetSqr <= attackRangeSqr)
+        {
+            // só setar se diferente
+            if (!animator.GetBool(InRangeHash)) animator.SetBool(InRangeHash, true);
+
+            if (Time.time >= nextAttackTime && !tahAtacando)
+            {
+                AttackTarget();
+                nextAttackTime = Time.time + attackRate;
+            }
+        }
+        else
+        {
+            if (animator.GetBool(InRangeHash)) animator.SetBool(InRangeHash, false);
+
+            // atualiza Speed no animator só se realmente mudou (pequena economia)
+            float speed = agent.velocity.magnitude;
+            if (!Mathf.Approximately(animator.GetFloat(SpeedHash), speed))
+                animator.SetFloat(SpeedHash, speed);
+        }
+    }
+
+    void TryUpdateDestination()
+    {
+        if (currentTarget == null || agent == null) return;
+
+        Vector3 targetPos = currentTarget.position;
+
+        // evita tocar enquanto o agente está calculando um path
+        if (agent.pathPending) return;
+
+        // checa se a diferença entre a última destinação e a atual é relevante
+        if (!agent.hasPath || (agent.destination - targetPos).sqrMagnitude > DESTINATION_EPSILON_SQR)
+        {
+            agent.SetDestination(targetPos);
+            lastDestination = targetPos;
         }
     }
 
@@ -247,7 +363,8 @@ public class EnemyAI : MonoBehaviour
         Vector3 lookPos = currentTarget.position;
         lookPos.y = transform.position.y;
         Quaternion wanted = Quaternion.LookRotation((lookPos - transform.position).normalized);
-        transform.rotation = Quaternion.Slerp(transform.rotation, wanted, 1f); 
+        //transform.rotation = Quaternion.Slerp(transform.rotation, wanted, 1f); 
+        transform.rotation = Quaternion.Slerp(transform.rotation, wanted, Time.deltaTime * 10f); // 10f = velocidade de giro
 
         // dispara animação
         tahAtacando = true;
@@ -290,13 +407,11 @@ public class EnemyAI : MonoBehaviour
     {
         if (attackCollider.enabled == true)
         {
-            Debug.Log("Collidi com" + other.gameObject.name);
-
             //Se for o player e tiver a vida então tira vida
-            if (other.gameObject.GetComponent<Health>() != null)
+            //if (other.gameObject.GetComponent<Health>() != null)
+            if (other.TryGetComponent<Health>(out var h))
             {
-                //UnityEngine.Debug.Log("matou o veio");
-                other.gameObject.GetComponent<Health>().TakeDamage(attackDamage);
+                h.TakeDamage(attackDamage);
                 variaveisGlobais.StartTomouDano();
             }
         }
@@ -313,7 +428,6 @@ public class EnemyAI : MonoBehaviour
         if (tahAtacando)
         {
             Debug.LogWarning($"[EnemyWatchdog:{name}] tahAtacando ficou true por {Time.time - started:F2}s -> forçando restauracao.");
-            // tenta restaurar
             OnAttackAnimationEnd();
         }
         attackWatchdogCoroutine = null;
@@ -332,6 +446,8 @@ public class EnemyAI : MonoBehaviour
     { 
         playerEngagement.StopTracking(this.transform);
         spawner.NotifyZombieRemoved();
+        agent.enabled = false;
+        enabled = false;
     }
 
     void OnDestroy()
