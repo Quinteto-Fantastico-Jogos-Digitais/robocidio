@@ -11,20 +11,28 @@ public class MainCharacterController : MonoBehaviour
 {
     [Header("References")]
     [Tooltip("Câmera filha que receberá o pitch (aplique aqui a câmera do jogador).")]
-    public Transform cameraTransform; // child camera; fallback Camera.main
+    public Transform cameraTransform;
+
+    [Header("UI Overlay")]
+    [Tooltip("Arraste aqui o GameObject (Canvas/Painel) que servirá de menu.")]
+    public GameObject menuOverlay; 
 
     [Header("Movement")]
     public VariavelGlobal variaveisGlobais;
-    //public float moveSpeed = 4f;            // unidades/segundo
-    public float moveSpeed = 10f;            // unidades/segundo
+    public float moveSpeed = 10f;
     [Range(0f, 0.5f)] public float moveSmoothTime = 0.08f;
 
+    [Header("Jump")]
+    public float jumpForce = 5f;
+    [Tooltip("Arraste o objeto vazio 'GroundCheck' que você criou nos pés")]
+    public Transform groundCheckTarget;
+    public float groundCheckRadius = 0.2f; 
+    [Tooltip("Selecione 'Movable' aqui na lista")]
+    public LayerMask groundLayer;
+
     [Header("Mouse Look")]
-    [Tooltip("Multiplicador horizontal do mouse (graus por unidade)")]
     public float mouseYawSensitivity = 8.0f;
-    [Tooltip("Multiplicador vertical do mouse (graus por unidade)")]
     public float mousePitchSensitivity = 8.0f;
-    [Tooltip("Tempo de suavização para o look (menor = mais responsivo).")]
     public float lookSmoothTime = 0.02f;
     public float minPitch = -45f;
     public float maxPitch = 60f;
@@ -66,10 +74,13 @@ public class MainCharacterController : MonoBehaviour
             if (Camera.main != null)
                 cameraTransform = Camera.main.transform;
             else
-                Debug.LogError("PlayerController: cameraTransform não setado e Camera.main não encontrada.");
+                Debug.LogError("PlayerController: cameraTransform não setado.");
         }
 
-        // inicializa yaw/pitch com os valores atuais do transform
+        float mult = PlayerPrefs.GetFloat("SensibilidadeMultiplicador", 1.0f);
+        mouseYawSensitivity *= mult;
+        mousePitchSensitivity *= mult;
+
         yawAngle = NormalizeAngle(transform.eulerAngles.y);
         if (cameraTransform != null)
         {
@@ -77,31 +88,75 @@ public class MainCharacterController : MonoBehaviour
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
         }
 
-        // cursor
         if (lockCursorOnStart)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
 
-        // cache rigidbody se existir
+        // Garante menu fechado e tempo rodando no inicio
+        if (menuOverlay != null) 
+            menuOverlay.SetActive(false);
+        
+        Time.timeScale = 1f; // Garante que o jogo não comece pausado
+
         rb = GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            // para este estilo de controle, kinematic ou non-kinematic ambos funcionam com MovePosition,
-            // mas recomendamos isKinematic=true se não usar física real de colisão/resposta de força.
-            // Não forçamos nada aqui — deixamos você controlar no inspector.
-        }
     }
 
     void Update()
     {
+        // --- LÓGICA DO MENU OVERLAY E PAUSE ---
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (menuOverlay != null)
+            {
+                bool isActive = !menuOverlay.activeSelf;
+                menuOverlay.SetActive(isActive);
+
+                if (isActive)
+                {
+                    // === PAUSAR O JOGO ===
+                    Time.timeScale = 0f; // Para o tempo
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                }
+                else
+                {
+                    // === DESPAUSAR O JOGO ===
+                    Time.timeScale = 1f; // Volta o tempo
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                }
+            }
+        }
+
+        // Se o menu estiver aberto, interrompe a leitura de inputs
+        if (menuOverlay != null && menuOverlay.activeSelf)
+        {
+            currentVelocity = Vector3.zero;
+            return; 
+        }
+
         // --- Input leitura ---
         // Mouse delta
         float mx = Input.GetAxis("Mouse X");
         float my = Input.GetAxis("Mouse Y");
 
         swordActive = Input.GetMouseButton(0) || Input.GetMouseButton(1);
+
+        // --- PULO COM SENSOR NOS PÉS ---
+        bool isGrounded = false;
+        if (groundCheckTarget != null)
+        {
+            isGrounded = Physics.CheckSphere(groundCheckTarget.position, groundCheckRadius, groundLayer);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && rb != null && isGrounded)
+        {
+            Vector3 vel = rb.linearVelocity;
+            rb.linearVelocity = new Vector3(vel.x, 0, vel.z); 
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
 
         // mouse use detection
         if (Mathf.Abs(mx) > mouseUseThreshold || Mathf.Abs(my) > mouseUseThreshold)
@@ -115,19 +170,14 @@ public class MainCharacterController : MonoBehaviour
                 IsUsingMouse = false;
         }
 
-        // lock/unlock cursor controls
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else if (lockOnClick && Cursor.lockState != CursorLockMode.Locked && (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)))
+        // lock cursor se clicar na tela (somente se menu fechado)
+        if (lockOnClick && Cursor.lockState != CursorLockMode.Locked && (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)))
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
 
-        // --- Look calculation (not applied yet) ---
+        // --- Look calculation ---
         if (!swordActive)
         {
             float targetYaw = yawAngle + mx * mouseYawSensitivity;
@@ -135,6 +185,8 @@ public class MainCharacterController : MonoBehaviour
             float targetPitch = pitch - mouseY * mousePitchSensitivity;
             targetPitch = Mathf.Clamp(targetPitch, minPitch, maxPitch);
 
+            // Nota: Usamos unscaledDeltaTime para a câmera não travar se o timeScale for mexido em slow motion,
+            // mas para pause total (0), ela vai travar mesmo, o que é correto.
             if (lookSmoothTime <= 0f)
             {
                 yawAngle = targetYaw;
@@ -166,7 +218,8 @@ public class MainCharacterController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // apply yaw to player body using Rigidbody.MoveRotation if possible
+        if (menuOverlay != null && menuOverlay.activeSelf) return;
+
         Quaternion targetRotation = Quaternion.Euler(0f, yawAngle, 0f);
 
         //if (rb != null)
@@ -235,5 +288,14 @@ public class MainCharacterController : MonoBehaviour
     {
         if (a > 180f) a -= 360f;
         return a;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (groundCheckTarget != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(groundCheckTarget.position, groundCheckRadius);
+        }
     }
 }
