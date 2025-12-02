@@ -77,6 +77,10 @@ public class MainCharacterController : MonoBehaviour
                 Debug.LogError("PlayerController: cameraTransform não setado.");
         }
 
+        float mult = PlayerPrefs.GetFloat("SensibilidadeMultiplicador", 1.0f);
+        mouseYawSensitivity *= mult;
+        mousePitchSensitivity *= mult;
+
         yawAngle = NormalizeAngle(transform.eulerAngles.y);
         if (cameraTransform != null)
         {
