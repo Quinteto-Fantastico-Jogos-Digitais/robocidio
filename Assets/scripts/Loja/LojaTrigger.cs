@@ -1,18 +1,19 @@
 using TMPro;
 using UnityEngine;
 
-public class Trigger : MonoBehaviour
+public class LojaTrigger : MonoBehaviour
 {
     public Transform playerBody;       // optional: used to evaluate local-space clamps
     public VariavelGlobal variaveisGlobais;
 
     private bool colidindo = false;
+    public bool SwitchClicou = false;
 
     void Update()
     {
         if (colidindo)
         {
-            if (Input.GetKeyDown(KeyCode.E))
+            if (Input.GetKeyDown(KeyCode.E) || SwitchClicou)
             {
                 variaveisGlobais.abreLoja();
             }
@@ -24,14 +25,23 @@ public class Trigger : MonoBehaviour
         if (other == null) return;
         if (!this.enabled) return;
 
-        Debug.Log("Colidi com: " + other.gameObject.name);
+        int tipoControle = PlayerPrefs.GetInt("tipoControle", 0);
 
-        //Se for inimigo chama a função de morrer
+        Debug.Log("Colidi com: " + other.gameObject.name);
         if (other.gameObject.name == playerBody.gameObject.name)
         {
-            variaveisGlobais.setTextoAux("Pressione <color=#FFFF00>E</color> abrir a Loja.");
+            if (tipoControle == 0)
+            {
+                variaveisGlobais.setTextoAux("Pressione <color=#FFFF00>E</color> abrir a Loja.");
+                
+            }
+            else
+            {
+                variaveisGlobais.setTextoAux("Pressione <color=#FFFF00>A</color> para tentar a sorte no Glorp. [Custa 1500]");
+            }
             colidindo = true;
         }
+        
     }
 
     void OnTriggerExit(Collider other)

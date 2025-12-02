@@ -17,6 +17,8 @@ public class VariavelGlobal : MonoBehaviour
     public int HealthUpgrade = 0;
     public int Luck = 0;
 
+    public SomController som;
+
     public GameObject GUI;
 
     private int indicePontos = 0;
@@ -67,6 +69,8 @@ public class VariavelGlobal : MonoBehaviour
 
         pontosContagem.SetText("{0}", 0);
         hordaContagem.SetText("{0}", 1f);
+        som.RandomSoundAndWait();
+        som.PlayMusicaPrincipalAndWait();
     }
 
     // Update is called once per frame
@@ -91,6 +95,7 @@ public class VariavelGlobal : MonoBehaviour
     {
         horda += 1;
         hordaContagem.SetText("{0}", horda);
+        som.Horda = horda;
     }
 
     public void SomaPontos(long qtd)
@@ -105,6 +110,7 @@ public class VariavelGlobal : MonoBehaviour
         pontos -= qtd;
         pontosContagem.SetText("{0}", pontos);
         pontosLoja.SetText("{0}", pontos);
+        som.PlayEspadaAndWait(2);
     }
 
     public void setVida(float qtd)
@@ -131,6 +137,7 @@ public class VariavelGlobal : MonoBehaviour
     {
         Blood.SetActive(true);
         Invoke(nameof(EndTomouDano), 0.5f);
+        som.PlayEspadaAndWait(3);
     }
 
     public void EndTomouDano()
@@ -157,6 +164,7 @@ public class VariavelGlobal : MonoBehaviour
     public void CallGameOver()
     {
         GameOver.SetActive(true);
+        som.CallGameOver();
 
         int tipoControle = PlayerPrefs.GetInt("tipoControle", 0);
 

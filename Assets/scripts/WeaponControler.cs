@@ -93,6 +93,8 @@ public class WeaponController : MonoBehaviour
     // fallback angular speed
     private const float fallbackMouseAngSpeed = 180f;
 
+    public SomController som;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -480,6 +482,7 @@ public class WeaponController : MonoBehaviour
             //UnityEngine.Debug.Log("matou o veio");
             variaveisGlobais.SomaPontos(130);
             other.gameObject.GetComponentInParent<EnemyAI>().die();
+            som.PlayEspadaAndWait(UnityEngine.Random.Range(0, 2));
         }
 
     }

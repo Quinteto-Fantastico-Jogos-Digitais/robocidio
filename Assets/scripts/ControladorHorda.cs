@@ -11,23 +11,18 @@ public class ControladorHorda : MonoBehaviour
     public GameObject zombie;
     public GameObject zombieRapido;
     public GameObject zombieRastejante;
-    
-    //Luzes
-    public GameObject luzes;
-    //Quadros
-    public GameObject quadros;
 
-    //Emoções
-    public Material negacao;
-    public Material raiva;
-    public Material barganha;
-    public Material depressao;
-    public Material aceitação;
-    public Material insanidade;
+    public GameObject Horda_Inicio;
+    public GameObject Horda_5;
+    public GameObject Horda_10;
+    public GameObject Horda_15;
+    public GameObject Horda_20;
+    public GameObject Horda_25;
+    public GameObject Horda_30;
+    public GameObject Horda_End;
+    public GameObject Derrota;
 
     private int horda = 1; //Aqui que a magia acontece
-    private Light[] todasAsLuzes;
-    private Renderer[] todasOsQuadros;
 
     public VariavelGlobal variaveisGlobais;
 
@@ -35,24 +30,10 @@ public class ControladorHorda : MonoBehaviour
     {
         spawner.OnHordeCompleted += OnHordeEnd;
 
-        //Transform luzesParent = luzes.transform;
-        todasAsLuzes = luzes.transform.GetComponentsInChildren<Light>();
-
-        //Transform quadrosParent = quadros.transform;
-        todasOsQuadros = quadros.transform.GetComponentsInChildren<Renderer>();
-
         zombie.SetActive(true);
         zombieRapido.SetActive(true);
         zombieRastejante.SetActive(true);
 
-        //Joga a primeira horda para começar e depois vai para a magia
-        //HORDA 1
-        /*ZombieSpawnInfo[] horde = new ZombieSpawnInfo[]
-        {
-            new ZombieSpawnInfo { prefab = zombie, count = 10}
-        };*/
-
-        //espera 30 segundos para chamar
         //StartHorde(horde);
         Invoke(nameof(StartHorde), 10f);
     }
@@ -67,7 +48,6 @@ public class ControladorHorda : MonoBehaviour
         }
 
         horda += 1;
-        //variaveisGlobais.SomaHorda();
 
         //espera 30 segundos para chamar
         Invoke(nameof(NewHorde), 15f);
@@ -78,7 +58,7 @@ public class ControladorHorda : MonoBehaviour
         variaveisGlobais.SomaHorda();
         variaveisGlobais.glorpCooldown = true;
 
-        int total = horda * 5;  // total de zumbis da horda
+        int total = horda * 3;  // total de zumbis da horda
 
         int qtd1 = 0;
         int qtd2 = 0;
@@ -90,87 +70,88 @@ public class ControladorHorda : MonoBehaviour
         switch (horda)
         {
             case 5: //Apresenta novo tipo de zombie e spawna alguns dele
+                Horda_Inicio.SetActive(false);
+                Horda_5.SetActive(true);
                 
-                qtd1 = 0;
+                qtd1 = UnityEngine.Random.Range(0, total + 1);
+                restante = total - qtd1;
                 
-                qtd2 = 30;
-                
+                qtd2 = restante;
+
                 qtd3 = 0;
                 break;
             
             case 10: //Apresenta novo tipo de zombie e spawna alguns dele
-                
-                qtd1 = 0;
-                
-                qtd2 = 0;
-                
-                qtd3 = 30;
+                Horda_5.SetActive(false);
+                Horda_10.SetActive(true);
+
+                qtd1 = UnityEngine.Random.Range(0, total + 1);
+
+                restante = total - qtd1;
+                qtd2 = UnityEngine.Random.Range(0, restante + 1);
+
+                qtd3 = total - (qtd1 + qtd2);
                 break;
 
             case 15: //Apagaremos as luzes (muda as fotos do palhaço tbm mas esse ta por outra hora)
-                ChangeLightColor(Color.black);
-                ChangeClownPhotos(negacao);
+                Horda_10.SetActive(false);
+                Horda_15.SetActive(true);
 
-                qtd1 = 25;
-                
-                qtd2 = 40;
-                
-                qtd3 = 10;
+                qtd1 = UnityEngine.Random.Range(0, total + 1);
+
+                restante = total - qtd1;
+                qtd2 = UnityEngine.Random.Range(0, restante + 1);
+
+                qtd3 = total - (qtd1 + qtd2);
                 break;
 
             case 20: //Muda para vermelho
-                ChangeLightColor(Color.red);
-                ChangeClownPhotos(raiva);
-                
-                qtd1 = 25;
-                
-                qtd2 = 40;
-                
-                qtd3 = 10;
+                Horda_15.SetActive(false);
+                Horda_20.SetActive(true);
+
+                qtd1 = UnityEngine.Random.Range(0, total + 1);
+
+                restante = total - qtd1;
+                qtd2 = UnityEngine.Random.Range(0, restante + 1);
+
+                qtd3 = total - (qtd1 + qtd2);
                 break;
             
-            case 30: //Muda para verde
-                ChangeLightColor(Color.green);
-                ChangeClownPhotos(barganha);
+            case 25: //Muda para verde
+                Horda_20.SetActive(false);
+                Horda_25.SetActive(true);
+
                 
-                qtd1 = 30;
-                
-                qtd2 = 90;
-                
-                qtd3 = 30;
+                qtd1 = UnityEngine.Random.Range(0, total + 1);
+
+                restante = total - qtd1;
+                qtd2 = UnityEngine.Random.Range(0, restante + 1);
+
+                qtd3 = total - (qtd1 + qtd2);
                 break;
             
-            case 40: //Muda para azul
-                ChangeLightColor(Color.blue);
-                ChangeClownPhotos(depressao);
-                
-                qtd1 = 80;
-                
-                qtd2 = 100;
-                
-                qtd3 = 20;
+            case 30: //Muda para azul
+                Horda_25.SetActive(false);
+                Horda_30.SetActive(true);
+
+                qtd1 = UnityEngine.Random.Range(0, total + 1);
+
+                restante = total - qtd1;
+                qtd2 = UnityEngine.Random.Range(0, restante + 1);
+
+                qtd3 = total - (qtd1 + qtd2);
                 break;
 
-            case 50: //Muda para amarelo
-                ChangeLightColor(Color.yellow);
-                ChangeClownPhotos(aceitação);
-                
-                qtd1 = 50;
-                
-                qtd2 = 150;
-                
-                qtd3 = 50;
-                break;
-            
-            case 60: //Insane
-                //vou mudar aleatoriamente a cor
-                ChangeClownPhotos(insanidade);
-                
-                qtd1 = 100;
-                
-                qtd2 = 100;
-                
-                qtd3 = 100;
+            case 35: //Muda para amarelo
+                Horda_30.SetActive(false);
+                Horda_End.SetActive(true);
+
+                qtd1 = UnityEngine.Random.Range(0, total + 1);
+
+                restante = total - qtd1;
+                qtd2 = UnityEngine.Random.Range(0, restante + 1);
+
+                qtd3 = total - (qtd1 + qtd2);
                 break;
             
             case > 60:
@@ -240,42 +221,17 @@ public class ControladorHorda : MonoBehaviour
         spawner.StartHorde(horde);
     }
 
-    void ChangeLightColor(Color cor)
+    public void CallGameOver()
     {
-        //Transform luzesParent = GameObject.Find("Luzes").transform;
-        //Light[] todasAsLuzes = luzesParent.GetComponentsInChildren<Light>();
-        todasAsLuzes = luzes.transform.GetComponentsInChildren<Light>();
-
-        if (cor == Color.black)
-        {
-            foreach (Light l in todasAsLuzes)
-            {
-                l.enabled = false;
-            }
-        }
-        else
-        {
-            foreach (Light l in todasAsLuzes)
-            {
-                l.enabled = true;
-                l.color = cor;
-            }
-        }
-    }
-
-    public void ChangeClownPhotos(Material novoMaterial)
-    {
-        //Transform quadrosParent = GameObject.Find("Quadros").transform;
-        //Renderer[] renderers = quadrosParent.GetComponentsInChildren<Renderer>();
-        todasOsQuadros = quadros.transform.GetComponentsInChildren<Renderer>();
-
-        foreach (Renderer r in todasOsQuadros)
-        {
-            //r.material = novoMaterial;
-            var material = r.materials;
-            material[1] = novoMaterial;
-            r.materials = material;
-        }
+        Horda_Inicio.SetActive(false);
+        Horda_5.SetActive(false);
+        Horda_10.SetActive(false);
+        Horda_15.SetActive(false);
+        Horda_20.SetActive(false);
+        Horda_25.SetActive(false);
+        Horda_30.SetActive(false);
+        Horda_End.SetActive(false);
+        Derrota.SetActive(true);
     }
 
 }

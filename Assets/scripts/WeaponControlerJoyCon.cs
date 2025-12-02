@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DynamicMeshCutter;
+using Unity.AI.Navigation;
 
 /// <summary>
 /// JoyconWeaponController_JoyconOnly
@@ -19,10 +20,11 @@ public class WeaponControllerJoyCon : MonoBehaviour
     public Transform handTransform;   // posição onde arma segue
     public Transform handlePivot;     // pivot que gira (mesh deve estar sob ele)
     public Camera came;
-    public Transform playerBody;      // usado para construir target global
+    public GameObject playerBody;      // usado para construir target global
     public PlaneBehaviour cutter;
 
     public GlorpTrigger glorp;
+    public LojaTrigger Loja;
     public ReloadDemo reload;
 
     public VariavelGlobal variaveisGlobais;
@@ -55,6 +57,11 @@ public class WeaponControllerJoyCon : MonoBehaviour
     private Quaternion lastJoyQuat = Quaternion.identity;
     private bool firstFrame = true;
 
+    public NavMeshSurface floor;
+
+    private bool tahCalibrando = false;
+    public GameObject Calibra;
+
     void Start()
     {
         joycons = (JoyconManager.Instance != null) ? JoyconManager.Instance.j : new List<Joycon>();
@@ -66,6 +73,7 @@ public class WeaponControllerJoyCon : MonoBehaviour
         else lastJoyQuat = (handlePivot != null) ? handlePivot.rotation : transform.rotation;
 
         previousTarget = (handlePivot != null) ? handlePivot.rotation : transform.rotation;
+        Calibracao();
     }
 
     void Update()
@@ -80,26 +88,32 @@ public class WeaponControllerJoyCon : MonoBehaviour
             Quaternion desired = cam.rotation;
 
             calibOffset = desired * Quaternion.Inverse(raw);
-            Debug.Log(desired);*/
+            Debug.Log(desired);
 
             Quaternion raw = j.GetVector();
             Transform cam = came.transform;
             Quaternion desired = Quaternion.LookRotation(cam.forward, cam.up); // orientação limpa da câmera
             calibOffset = desired * Quaternion.Inverse(raw);
-            Debug.Log("[Calib] desired (world cam): " + desired.eulerAngles);
-
+            Debug.Log("[Calib] desired (world cam): " + desired.eulerAngles);*/
+            Calibracao();
         }
 
         if (j.GetButtonDown(Joycon.Button.DPAD_RIGHT)) {
             glorp.SwitchClicou = true;
+            Loja.SwitchClicou = true;
         }
 
         if (j.GetButtonUp(Joycon.Button.DPAD_RIGHT)) {
             glorp.SwitchClicou = false;
+            Loja.SwitchClicou = false;
         }
 
         if (j.GetButtonUp(Joycon.Button.DPAD_UP)) {
             reload.reload();
+        }
+
+        if (j.GetButtonUp(Joycon.Button.DPAD_DOWN)) {
+            EndCalibracao();
         }
 
         // Prefer Joycon data only. If não houver Joycon, mantém última quat conhecida (no últimoJoyQuat).
@@ -169,7 +183,7 @@ public class WeaponControllerJoyCon : MonoBehaviour
         previousTarget = targetLocal;
 
         // target no mundo (opcionalmente relativo ao playerBody)
-        if (playerBody != null) targetRotation = playerBody.rotation * targetLocal;
+        if (playerBody != null) targetRotation = playerBody.transform.rotation * targetLocal;
         else targetRotation = targetLocal;
 
         firstFrame = false;
@@ -178,6 +192,35 @@ public class WeaponControllerJoyCon : MonoBehaviour
         if (handTransform != null)
             transform.position = handTransform.position;
 
+    }
+
+    public void Calibracao()
+    {
+        tahCalibrando = true;
+        Calibra.SetActive(true);
+
+        //desativa o chão (para os inimigos)
+        floor.enabled = false;
+        playerBody.GetComponent<MainCharacterControllerJoyCon>().enabled = false;
+
+        playerBody.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        
+        Joycon j = (joycons != null && joycons.Count > jcIndex) ? joycons[jcIndex] : null;
+        Quaternion raw = j.GetVector();
+        Transform cam = came.transform;
+        Quaternion desired = Quaternion.LookRotation(cam.forward, cam.up); // orientação limpa da câmera
+        calibOffset = desired * Quaternion.Inverse(raw);
+        Debug.Log("[Calib] desired (world cam): " + desired.eulerAngles);
+    }
+
+    public void EndCalibracao()
+    {
+        tahCalibrando = false;
+        Calibra.SetActive(false);
+
+        //desativa o chão (para os inimigos)
+        floor.enabled = true;
+        playerBody.GetComponent<MainCharacterControllerJoyCon>().enabled = true;
     }
 
     void FixedUpdate()

@@ -9,6 +9,7 @@ public class Health : MonoBehaviour
     private float currentHealth; 
 
     public VariavelGlobal variaveisGlobais;
+    public ControladorHorda Controla;
 
     public float CurrentHealth 
     {
@@ -53,6 +54,7 @@ public class Health : MonoBehaviour
     private void Die()
     {
         Debug.Log($"{gameObject.name} morreu!");
+        Controla.CallGameOver();
         variaveisGlobais.CallGameOver();
     }
 }

@@ -165,8 +165,11 @@ namespace DynamicMeshCutter
             foreach (var go in cData.CreatedObjects)
             {
                 if (go == null) continue;
-                //foreach (Transform t in go.transform) t.gameObject.layer = LayerMask.NameToLayer("Corte");
-                foreach (Transform t in go.transform) Destroy(go, 5f);
+                foreach (Transform t in go.transform)
+                {
+                    t.gameObject.layer = LayerMask.NameToLayer("sword");
+                    Destroy(go, 5f);
+                } 
             }
         }
 
