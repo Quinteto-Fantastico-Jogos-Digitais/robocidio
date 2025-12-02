@@ -45,7 +45,7 @@ MonoBehaviour:
       height: 0
     tilingTreatment: 1
   resultMaterials:
-  - combinedMaterial: {fileID: 2100000, guid: 89de551c8a7b9ef4e8353c0c6faabf67, type: 2}
+  - combinedMaterial: {fileID: 2100000, guid: 1e29f54c3b0848c408cffc7f4939cd71, type: 2}
     considerMeshUVs: 1
     sourceMaterials:
     - {fileID: 2100000, guid: 594778b95c944484da12ef12c7085ddd, type: 2}

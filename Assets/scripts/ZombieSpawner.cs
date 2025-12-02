@@ -55,7 +55,7 @@ public class ZombieSpawner : MonoBehaviour
         OnHordeCompleted?.Invoke();
     }
 
-    void SpawnSingle(GameObject prefab)
+    public void SpawnSingle(GameObject prefab)
     {
         // instancia no ponto aleatório (assume que spawnPoints tem pelo menos 1 elemento)
         int idx = UnityEngine.Random.Range(0, spawnPoints.Length);

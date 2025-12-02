@@ -161,7 +161,7 @@ MonoBehaviour:
       height: 0
     tilingTreatment: 1
   resultMaterials:
-  - combinedMaterial: {fileID: 2100000, guid: 89de551c8a7b9ef4e8353c0c6faabf67, type: 2}
+  - combinedMaterial: {fileID: 2100000, guid: 01d3b455f8cd5f14db57a6f9665cf04f, type: 2}
     considerMeshUVs: 1
     sourceMaterials:
     - {fileID: 2100000, guid: 594778b95c944484da12ef12c7085ddd, type: 2}
@@ -189,7 +189,7 @@ MonoBehaviour:
     - {fileID: 2100000, guid: 07ae16bfdfd1cba4091a1dbedf736e7b, type: 2}
     - {fileID: 2100000, guid: 58057e527cc3a99448c4fa18c1dc4d57, type: 2}
     - {fileID: 2100000, guid: 667e27674a03939458faafba23e5fa6a, type: 2}
-    - {fileID: 2100000, guid: d703a40a8c98547448fafb0ded0294ae, type: 2}
-    - {fileID: 2100000, guid: b525848a137891c4992981036466ac94, type: 2}
+    - {fileID: 2100000, guid: ab26c8ccba2c57c418d27e223de49d75, type: 2}
+    - {fileID: 2100000, guid: 8465cef88a6d0f04dbc78772518d688e, type: 2}
   resultMaterialsTexArray: []
   doMultiMaterial: 1
