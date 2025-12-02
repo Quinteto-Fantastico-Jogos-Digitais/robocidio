@@ -14,7 +14,182 @@ MonoBehaviour:
   m_EditorClassIdentifier: MeshBakerLib.dll::MB2_TextureBakeResults
   version: 3252
   resultType: 0
-  materialsAndUVRects: []
-  resultMaterials: []
+  materialsAndUVRects:
+  - material: {fileID: 2100000, guid: 3038eef7c4e5ca54781e1198471b3579, type: 2}
+    atlasRect:
+      serializedVersion: 2
+      x: 0.0009765625
+      y: 0.36328125
+      width: 0.37402344
+      height: 0.5
+    srcObjName: p.052
+    textureArraySliceIdx: -1
+    allPropsUseSameTiling: 1
+    allPropsUseSameTiling_sourceMaterialTiling:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    allPropsUseSameTiling_samplingEncapsulatinRect:
+      serializedVersion: 2
+      x: 0.12512219
+      y: 0
+      width: 0.7497556
+      height: 1
+    propsUseDifferntTiling_srcUVsamplingRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    tilingTreatment: 1
+  - material: {fileID: 2100000, guid: 187dced11b206704ca938d468eb72c19, type: 2}
+    atlasRect:
+      serializedVersion: 2
+      x: 0.0009765625
+      y: 0.0009765625
+      width: 0.67285156
+      height: 0.36035156
+    srcObjName: Barandal.003 (1)
+    textureArraySliceIdx: -1
+    allPropsUseSameTiling: 1
+    allPropsUseSameTiling_sourceMaterialTiling:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    allPropsUseSameTiling_samplingEncapsulatinRect:
+      serializedVersion: 2
+      x: -0.8464718
+      y: -0.222388
+      width: 2.6929436
+      height: 1.444776
+    propsUseDifferntTiling_srcUVsamplingRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    tilingTreatment: 1
+  - material: {fileID: 2100000, guid: cd33638865c6a9b45a6eaa2c3f96efe6, type: 2}
+    atlasRect:
+      serializedVersion: 2
+      x: 0.67578125
+      y: 0.0009765625
+      width: 0.24804688
+      height: 0.23828125
+    srcObjName: Alfonbra.004 (5)
+    textureArraySliceIdx: -1
+    allPropsUseSameTiling: 1
+    allPropsUseSameTiling_sourceMaterialTiling:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    allPropsUseSameTiling_samplingEncapsulatinRect:
+      serializedVersion: 2
+      x: 0.0028717518
+      y: 0.023281688
+      width: 0.9942555
+      height: 0.9534356
+    propsUseDifferntTiling_srcUVsamplingRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    tilingTreatment: 1
+  - material: {fileID: 2100000, guid: c7201c9825123c844ab59b133c6e296d, type: 2}
+    atlasRect:
+      serializedVersion: 2
+      x: 0.37695312
+      y: 0.36328125
+      width: 0.23535156
+      height: 0.24707031
+    srcObjName: Lampara2.009 (5)
+    textureArraySliceIdx: -1
+    allPropsUseSameTiling: 1
+    allPropsUseSameTiling_sourceMaterialTiling:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    allPropsUseSameTiling_samplingEncapsulatinRect:
+      serializedVersion: 2
+      x: 0.0058490797
+      y: 0.0058490797
+      width: 0.94365156
+      height: 0.98849446
+    propsUseDifferntTiling_srcUVsamplingRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    tilingTreatment: 1
+  - material: {fileID: 2100000, guid: c9e774d67ef22394987d1029d53d2ff8, type: 2}
+    atlasRect:
+      serializedVersion: 2
+      x: 0.92578125
+      y: 0.0009765625
+      width: 0.0126953125
+      height: 0.0146484375
+    srcObjName: Lampara2.009 (5)
+    textureArraySliceIdx: -1
+    allPropsUseSameTiling: 1
+    allPropsUseSameTiling_sourceMaterialTiling:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    allPropsUseSameTiling_samplingEncapsulatinRect:
+      serializedVersion: 2
+      x: 0.0029245398
+      y: 0
+      width: 0.87248766
+      height: 0.9972681
+    propsUseDifferntTiling_srcUVsamplingRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    tilingTreatment: 1
+  resultMaterials:
+  - combinedMaterial: {fileID: 2100000, guid: 89de551c8a7b9ef4e8353c0c6faabf67, type: 2}
+    considerMeshUVs: 1
+    sourceMaterials:
+    - {fileID: 2100000, guid: 594778b95c944484da12ef12c7085ddd, type: 2}
+    - {fileID: 2100000, guid: c28c0d1ebdadd264098b9f1d462ebd69, type: 2}
+    - {fileID: 2100000, guid: cd33638865c6a9b45a6eaa2c3f96efe6, type: 2}
+    - {fileID: 2100000, guid: e2c3b880297e02848bebb68002098897, type: 2}
+    - {fileID: 2100000, guid: 0c3f8f1b9f5650e4fb27d9d2cf1d2a4e, type: 2}
+    - {fileID: 2100000, guid: e1e3f44c1166e884487de884a00d36b5, type: 2}
+    - {fileID: 2100000, guid: c9e774d67ef22394987d1029d53d2ff8, type: 2}
+    - {fileID: 2100000, guid: c7201c9825123c844ab59b133c6e296d, type: 2}
+    - {fileID: 2100000, guid: 8d87047259e9d7c42a9bbe3c8eaabb00, type: 2}
+    - {fileID: 2100000, guid: 205336d07114b4e42ac0a282f79a82ec, type: 2}
+    - {fileID: 2100000, guid: 187dced11b206704ca938d468eb72c19, type: 2}
+    - {fileID: 2100000, guid: 467b158c0cfde9b4aa739f35c3c72914, type: 2}
+    - {fileID: 2100000, guid: 3038eef7c4e5ca54781e1198471b3579, type: 2}
+    - {fileID: 2100000, guid: a174d7ed233dce34092fdb84587e4759, type: 2}
+    - {fileID: 2100000, guid: e3e16b606cd652a4184dcdc635a48469, type: 2}
+    - {fileID: 2100000, guid: 684a47ddc00a4894286aff1dce1f928d, type: 2}
+    - {fileID: 2100000, guid: 9053e51aa916e0543b5b4c7b1db38865, type: 2}
+    - {fileID: 2100000, guid: 881f82d5bca006544b27c925d320e674, type: 2}
+    - {fileID: 2100000, guid: 03f1a3bb2a6b7294d9287b9f111d95f6, type: 2}
+    - {fileID: 2100000, guid: d4fc6805bb7b5f84a839faec0ac44740, type: 2}
+    - {fileID: 2100000, guid: f7ab4e6c60372c74ea26fee8fe60a51b, type: 2}
+    - {fileID: 2100000, guid: be66cae49427a2544ae687b2a2e196af, type: 2}
+    - {fileID: 2100000, guid: 07ae16bfdfd1cba4091a1dbedf736e7b, type: 2}
+    - {fileID: 2100000, guid: 58057e527cc3a99448c4fa18c1dc4d57, type: 2}
+    - {fileID: 2100000, guid: 667e27674a03939458faafba23e5fa6a, type: 2}
+    - {fileID: 2100000, guid: d703a40a8c98547448fafb0ded0294ae, type: 2}
+    - {fileID: 2100000, guid: b525848a137891c4992981036466ac94, type: 2}
   resultMaterialsTexArray: []
-  doMultiMaterial: 0
+  doMultiMaterial: 1
