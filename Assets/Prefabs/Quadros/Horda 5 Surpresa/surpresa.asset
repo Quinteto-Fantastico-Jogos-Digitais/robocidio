@@ -15,7 +15,7 @@ MonoBehaviour:
   version: 3252
   resultType: 0
   materialsAndUVRects:
-  - material: {fileID: 2100000, guid: 187dced11b206704ca938d468eb72c19, type: 2}
+  - material: {fileID: 2100000, guid: 467b158c0cfde9b4aa739f35c3c72914, type: 2}
     atlasRect:
       serializedVersion: 2
       x: 0.00048828125
@@ -364,7 +364,7 @@ MonoBehaviour:
       height: 0
     tilingTreatment: 1
   resultMaterials:
-  - combinedMaterial: {fileID: 2100000, guid: 03054e5badb28eb4a9560d456e13f167, type: 2}
+  - combinedMaterial: {fileID: 2100000, guid: c5450d6a217c4b74ca78e1bc96329740, type: 2}
     considerMeshUVs: 1
     sourceMaterials:
     - {fileID: 2100000, guid: 33a93ea0461704d41b83047343a5c227, type: 2}
@@ -387,7 +387,7 @@ MonoBehaviour:
     - {fileID: 2100000, guid: 8f7b84dd79a27d9459dd6eb9797903ed, type: 2}
     - {fileID: 2100000, guid: 9fa8ebb1d57f5b447b3be16c18507d5d, type: 2}
     - {fileID: 2100000, guid: 5a23a610ff00fc844b814b86cd446ca1, type: 2}
-    - {fileID: 2100000, guid: 187dced11b206704ca938d468eb72c19, type: 2}
+    - {fileID: 2100000, guid: 467b158c0cfde9b4aa739f35c3c72914, type: 2}
     - {fileID: 2100000, guid: 6012a81cec7d6b5489cafeb3ca3cd33f, type: 2}
     - {fileID: 2100000, guid: d95a71e331d7e3345b931ceeba5d7689, type: 2}
     - {fileID: 2100000, guid: e379a78d8d101a04eb0f49d743540a73, type: 2}

@@ -15,14 +15,14 @@ MonoBehaviour:
   version: 3252
   resultType: 0
   materialsAndUVRects:
-  - material: {fileID: 2100000, guid: 187dced11b206704ca938d468eb72c19, type: 2}
+  - material: {fileID: 2100000, guid: 467b158c0cfde9b4aa739f35c3c72914, type: 2}
     atlasRect:
       serializedVersion: 2
       x: 0.00048828125
       y: 0.00048828125
       width: 0.35546875
       height: 0.22949219
-    srcObjName: Quadro 100x200 (1)
+    srcObjName: Quadro 100x200 (2)
     textureArraySliceIdx: -1
     allPropsUseSameTiling: 1
     allPropsUseSameTiling_sourceMaterialTiling:
@@ -37,35 +37,6 @@ MonoBehaviour:
       y: -0.95581496
       width: 2.844962
       height: 1.8389943
-    propsUseDifferntTiling_srcUVsamplingRect:
-      serializedVersion: 2
-      x: 0
-      y: 0
-      width: 0
-      height: 0
-    tilingTreatment: 1
-  - material: {fileID: 2100000, guid: 848e8d6df0fcbfd45b92fd20847208dc, type: 2}
-    atlasRect:
-      serializedVersion: 2
-      x: 0.24560547
-      y: 0.35253906
-      width: 0.12158203
-      height: 0.12060547
-    srcObjName: Quadro 100x200 (1)
-    textureArraySliceIdx: -1
-    allPropsUseSameTiling: 1
-    allPropsUseSameTiling_sourceMaterialTiling:
-      serializedVersion: 2
-      x: -0.06
-      y: 0.05
-      width: 4
-      height: 6
-    allPropsUseSameTiling_samplingEncapsulatinRect:
-      serializedVersion: 2
-      x: 2.0001519
-      y: 4.0186296
-      width: 0.97600245
-      height: 0.965729
     propsUseDifferntTiling_srcUVsamplingRect:
       serializedVersion: 2
       x: 0
@@ -366,8 +337,8 @@ MonoBehaviour:
   - material: {fileID: 2100000, guid: 20fe73357903b934683a299c4505b985, type: 2}
     atlasRect:
       serializedVersion: 2
-      x: 0.24560547
-      y: 0.4741211
+      x: 0.123046875
+      y: 0.35253906
       width: 0.12158203
       height: 0.12060547
     srcObjName: Quadro 200x200 (7)
@@ -395,7 +366,7 @@ MonoBehaviour:
   - material: {fileID: 2100000, guid: d95a71e331d7e3345b931ceeba5d7689, type: 2}
     atlasRect:
       serializedVersion: 2
-      x: 0.123046875
+      x: 0.24560547
       y: 0.35253906
       width: 0.12158203
       height: 0.12060547
@@ -424,8 +395,8 @@ MonoBehaviour:
   - material: {fileID: 2100000, guid: c44099b84365679499b79e29ab893b33, type: 2}
     atlasRect:
       serializedVersion: 2
-      x: 0.00048828125
-      y: 0.8388672
+      x: 0.123046875
+      y: 0.23095703
       width: 0.12158203
       height: 0.12060547
     srcObjName: Quadro 200x200 (9)
@@ -454,7 +425,7 @@ MonoBehaviour:
     atlasRect:
       serializedVersion: 2
       x: 0.24560547
-      y: 0.71728516
+      y: 0.5957031
       width: 0.10644531
       height: 0.118652344
     srcObjName: Quadro 200x200 (10)
@@ -772,8 +743,8 @@ MonoBehaviour:
   - material: {fileID: 2100000, guid: a41d04622ee65374e8e812d9a8df76ba, type: 2}
     atlasRect:
       serializedVersion: 2
-      x: 0.123046875
-      y: 0.23095703
+      x: 0.00048828125
+      y: 0.8388672
       width: 0.12158203
       height: 0.12060547
     srcObjName: Quadro 325x350 (6)
@@ -802,7 +773,7 @@ MonoBehaviour:
     atlasRect:
       serializedVersion: 2
       x: 0.24560547
-      y: 0.5957031
+      y: 0.4741211
       width: 0.12158203
       height: 0.12060547
     srcObjName: Quadro 400x400 (1)
@@ -828,7 +799,7 @@ MonoBehaviour:
       height: 0
     tilingTreatment: 1
   resultMaterials:
-  - combinedMaterial: {fileID: 2100000, guid: 03054e5badb28eb4a9560d456e13f167, type: 2}
+  - combinedMaterial: {fileID: 2100000, guid: c5450d6a217c4b74ca78e1bc96329740, type: 2}
     considerMeshUVs: 1
     sourceMaterials:
     - {fileID: 2100000, guid: 33a93ea0461704d41b83047343a5c227, type: 2}
@@ -851,7 +822,7 @@ MonoBehaviour:
     - {fileID: 2100000, guid: 8f7b84dd79a27d9459dd6eb9797903ed, type: 2}
     - {fileID: 2100000, guid: 9fa8ebb1d57f5b447b3be16c18507d5d, type: 2}
     - {fileID: 2100000, guid: 5a23a610ff00fc844b814b86cd446ca1, type: 2}
-    - {fileID: 2100000, guid: 187dced11b206704ca938d468eb72c19, type: 2}
+    - {fileID: 2100000, guid: 467b158c0cfde9b4aa739f35c3c72914, type: 2}
     - {fileID: 2100000, guid: 6012a81cec7d6b5489cafeb3ca3cd33f, type: 2}
     - {fileID: 2100000, guid: d95a71e331d7e3345b931ceeba5d7689, type: 2}
     - {fileID: 2100000, guid: e379a78d8d101a04eb0f49d743540a73, type: 2}
